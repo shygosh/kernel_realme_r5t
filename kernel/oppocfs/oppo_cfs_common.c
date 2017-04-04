@@ -368,7 +368,7 @@ static int __do_ux_balance(void *data)
 	}
 
 	raw_spin_unlock(&src_rq->lock);
-	for_each_cpu_and(i, &(p->cpus_allowed), cpu_coregroup_mask(src_cpu)) {
+	for_each_cpu_and(i, p->cpus_ptr, cpu_coregroup_mask(src_cpu)) {
 		if (i == src_cpu || !cpu_online(i))
 			continue;
 		dst_rq = cpu_rq(i);
