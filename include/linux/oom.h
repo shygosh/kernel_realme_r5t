@@ -118,6 +118,9 @@ extern void dump_tasks(struct mem_cgroup *memcg,
 
 extern void wake_oom_reaper(struct task_struct *tsk);
 
+extern bool should_ulmk_retry(void);
+extern void ulmk_update_last_kill(void);
+
 /* sysctls */
 extern int sysctl_oom_dump_tasks;
 extern int sysctl_oom_kill_allocating_task;
