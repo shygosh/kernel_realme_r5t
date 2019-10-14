@@ -568,6 +568,9 @@ void psi_emergency_trigger(void)
 		return;
 
 	list_for_each_entry(t, &group->triggers, node) {
+		if (strcmp(t->comm, "lmkd"))
+			continue;
+
 		/* Generate an event */
 		if (cmpxchg(&t->event, 0, 1) == 0)
 			wake_up_interruptible(&t->event_wait);
@@ -1074,6 +1077,7 @@ struct psi_trigger *psi_trigger_create(struct psi_group *group,
 	t->event = 0;
 	t->last_event_time = 0;
 	init_waitqueue_head(&t->event_wait);
+	get_task_comm(t->comm, current);
 
 	mutex_lock(&group->trigger_lock);
 
