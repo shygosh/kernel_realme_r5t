@@ -975,6 +975,13 @@ static void oom_kill_process(struct oom_control *oc, const char *message)
 	put_task_struct(p);
 	read_unlock(&tasklist_lock);
 
+	/*
+	 * If ->only_positive_adj = true in oom context,
+	 * consider them as kill from ulmk.
+	 */
+	if (oc->only_positive_adj)
+		ulmk_update_last_kill();
+
 	p = find_lock_task_mm(victim);
 	if (!p) {
 		put_task_struct(victim);
