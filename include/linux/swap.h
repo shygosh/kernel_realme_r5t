@@ -382,7 +382,6 @@ static inline int node_reclaim(struct pglist_data *pgdat, gfp_t mask,
 }
 #endif
 
-extern int page_evictable(struct page *page);
 extern void check_move_unevictable_pages(struct page **, int nr_pages);
 
 extern int kswapd_run(int nid);
