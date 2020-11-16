@@ -519,6 +519,14 @@
 			reg = <0 0x74500000 0 0x1e00000>;
 		};
 
+		ramoops: ramoops@61600000 {
+			compatible = "ramoops";
+			reg = <0x0 0x61600000 0x0 0x00400000>;
+
+			record-size = <0x100000>;
+			console-size = <0x250000>;
+		};
+
 //#ifdef CONFIG_VENDOR_EDIT
 		pil_adsp_mem: pil_adsp_region@76300000 {
 			compatible = "removed-dma-pool";
