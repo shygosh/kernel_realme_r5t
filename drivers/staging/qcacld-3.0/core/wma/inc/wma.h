@@ -93,7 +93,7 @@
 #define wma_debug(params...) QDF_TRACE_DEBUG(QDF_MODULE_ID_WMA, params)
 #define wma_err_rl(params...) QDF_TRACE_ERROR_RL(QDF_MODULE_ID_WMA, params)
 
-#define WMA_DEBUG_ALWAYS
+// #define WMA_DEBUG_ALWAYS
 
 #ifdef WMA_DEBUG_ALWAYS
 #define WMA_LOGA(args ...) \
