@@ -16,7 +16,7 @@
 #define OCDT_VERSION_2_0	(2)
 
 #define UINT2Ptr(n)		(uint32_t *)(n)
-#define Ptr2UINT32(p)	(uint32_t)(p)
+#define Ptr2UINT32(p)	(uintptr_t)(p)
 
 #define PROJECT_VERSION			(0x1)
 #define PCB_VERSION				(0x2)
