@@ -723,6 +723,7 @@ static int enter_state(suspend_state_t state)
 	}
 #endif /* CONFIG_VENDOR_EDIT */
 
+	pm_wakeup_clear(true);
 	if (state == PM_SUSPEND_TO_IDLE)
 		s2idle_begin();
 
