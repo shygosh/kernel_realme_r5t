@@ -74,6 +74,9 @@
 #include <asm/tlbflush.h>
 #include <asm/div64.h>
 #include "internal.h"
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_MEM_MONITOR)
+#include <linux/memory_monitor.h>
+#endif /*CONFIG_VENDOR_EDIT*/
 
 /* prevent >1 _updater_ of zone percpu pageset ->high and ->batch fields */
 static DEFINE_MUTEX(pcp_batch_high_lock);
@@ -4010,7 +4013,9 @@ __alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
 	int no_progress_loops;
 	unsigned int cpuset_mems_cookie;
 	int reserve_flags;
-
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_MEM_MONITOR)
+	unsigned long oppo_alloc_start = jiffies;
+#endif /*CONFIG_VENDOR_EDIT*/
 	/*
 	 * We also sanity check to catch abuse of atomic reserves being used by
 	 * callers that are not in atomic context.
@@ -4245,6 +4250,9 @@ fail:
 	warn_alloc(gfp_mask, ac->nodemask,
 			"page allocation failure: order:%u", order);
 got_pg:
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_MEM_MONITOR)
+	memory_alloc_monitor(gfp_mask, order, jiffies_to_msecs(jiffies - oppo_alloc_start));
+#endif /*CONFIG_VENDOR_EDIT*/
 	return page;
 }
 
@@ -4703,6 +4711,9 @@ long si_mem_available(void)
 	available += global_node_page_state(NR_INDIRECTLY_RECLAIMABLE_BYTES) >>
 		PAGE_SHIFT;
 
+#ifdef CONFIG_VENDOR_EDIT
+	available += global_zone_page_state(NR_IONCACHE_PAGES);
+#endif
 	if (available < 0)
 		available = 0;
 	return available;
