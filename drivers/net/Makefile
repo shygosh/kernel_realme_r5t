@@ -13,6 +13,10 @@ obj-$(CONFIG_DUMMY) += dummy.o
 obj-$(CONFIG_EQUALIZER) += eql.o
 obj-$(CONFIG_IFB) += ifb.o
 obj-$(CONFIG_MACSEC) += macsec.o
+#ifdef CONFIG_VENDOR_EDIT
+#Add for limit speed function
+obj-$(CONFIG_IMQ) += imq.o
+#endif /* CONFIG_VENDOR_EDIT */
 obj-$(CONFIG_MACVLAN) += macvlan.o
 obj-$(CONFIG_MACVTAP) += macvtap.o
 obj-$(CONFIG_MII) += mii.o
