@@ -1061,7 +1061,9 @@ const char * const vmstat_text[] = {
 	"numa_local",
 	"numa_other",
 #endif
-
+#ifdef CONFIG_VENDOR_EDIT
+        "nr_ioncache_pages",
+#endif /*CONFIG_VENDOR_EDIT*/
 	/* Node-based counters */
 	"nr_inactive_anon",
 	"nr_active_anon",

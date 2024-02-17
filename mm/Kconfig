@@ -841,3 +841,11 @@ config PROCESS_RECLAIM
 	 (addr, addr + size-bytes) of the process.
 
 	 Any other value is ignored.
+
+#ifdef CONFIG_VENDOR_EDIT
+config OPPO_MEM_MONITOR
+	bool "memory monitor "
+	default n
+	help
+	 memory monitor.
+#endif /* CONFIG_VENDOR_EDIT */
