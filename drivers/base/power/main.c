@@ -129,9 +129,18 @@ void device_pm_add(struct device *dev)
 		 dev->bus ? dev->bus->name : "No Bus", dev_name(dev));
 	device_pm_check_callbacks(dev);
 	mutex_lock(&dpm_list_mtx);
+#ifndef CONFIG_VENDOR_EDIT
 	if (dev->parent && dev->parent->power.is_prepared)
 		dev_warn(dev, "parent %s should not be sleeping\n",
 			dev_name(dev->parent));
+#else
+	if (dev->parent && dev->parent->power.is_prepared) {
+		dev_warn(dev, "parent %s should not be sleeping\n",
+			dev_name(dev->parent));
+		pr_info("debug Adding info for %s:%s\n",
+		 dev->bus ? dev->bus->name : "No Bus", dev_name(dev));
+	}
+#endif /* CONFIG_VENDOR_EDIT */
 	list_add_tail(&dev->power.entry, &dpm_list);
 	dev->power.in_dpm_list = true;
 	mutex_unlock(&dpm_list_mtx);
@@ -577,6 +586,10 @@ static int device_resume_noirq(struct device *dev, pm_message_t state, bool asyn
 	dev->power.is_noirq_suspended = false;
 
  Out:
+//#ifdef CONFIG_ODM_WT_EDIT
+	pm_runtime_enable(dev);
+//#endif
+
 	complete_all(&dev->power.completion);
 	TRACE_RESUME(error);
 	return error;
@@ -718,8 +731,9 @@ static int device_resume_early(struct device *dev, pm_message_t state, bool asyn
 
  Out:
 	TRACE_RESUME(error);
-
-	pm_runtime_enable(dev);
+//#ifdef CONFIG_ODM_WT_EDIT
+	//pm_runtime_enable(dev);
+//#endif
 	complete_all(&dev->power.completion);
 	return error;
 }
@@ -1101,6 +1115,9 @@ static int __device_suspend_noirq(struct device *dev, pm_message_t state, bool a
 	TRACE_DEVICE(dev);
 	TRACE_SUSPEND(0);
 
+//#ifdef CONFIG_ODM_WT_EDIT
+	__pm_runtime_disable(dev, false);
+//#endif
 	dpm_wait_for_subordinate(dev, async);
 
 	if (async_error)
@@ -1260,7 +1277,9 @@ static int __device_suspend_late(struct device *dev, pm_message_t state, bool as
 	TRACE_DEVICE(dev);
 	TRACE_SUSPEND(0);
 
-	__pm_runtime_disable(dev, false);
+//#ifdef CONFIG_ODM_WT_EDIT
+	//__pm_runtime_disable(dev, false);
+//#endif	
 
 	dpm_wait_for_subordinate(dev, async);
 
