@@ -28,8 +28,28 @@
 #include "qrtr.h"
 
 #define QRTR_LOG_PAGE_CNT 4
+//Modify for: print qrtr debug msg and fix QMI wakeup statistics for QCOM platforms using glink.
+//#ifndef CONFIG_VENDOR_EDIT
+//#define QRTR_INFO(ctx, x, ...)				\
+//  ipc_log_string(ctx, x, ##__VA_ARGS__)
+//#else
 #define QRTR_INFO(ctx, x, ...)				\
-	ipc_log_string(ctx, x, ##__VA_ARGS__)
+    do { \
+        ipc_log_string(ctx, x, ##__VA_ARGS__); \
+        if (qrtr_first_msg) \
+        { \
+            memset(qrtr_first_msg_details, 0, sizeof(qrtr_first_msg_details)); \
+            strlcpy(qrtr_first_msg_details, QRTR_FIRST_HEAD, sizeof(qrtr_first_msg_details)); \
+            snprintf(qrtr_first_msg_details + QRTR_FIRST_HEAD_COUNT, sizeof(qrtr_first_msg_details) - QRTR_FIRST_HEAD_COUNT, x, ##__VA_ARGS__); \
+            if (strstr(qrtr_first_msg_details, "RX DATA")) \
+            { \
+                qrtr_first_msg = 0; \
+                pr_info(x, ##__VA_ARGS__); \
+            } \
+        } \
+    } while(0)
+//#endif
+/* CONFIG_VENDOR_EDIT */
 
 #define QRTR_PROTO_VER_1 1
 #define QRTR_PROTO_VER_2 3
