@@ -6722,6 +6722,13 @@ void selinux_complete_init(void)
 	iterate_supers(delayed_superblock_init, NULL);
 }
 
+#ifdef CONFIG_VENDOR_EDIT
+int get_current_security_context(char **context, u32 *context_len)
+{
+	u32 sid = current_sid();
+	return security_sid_to_context(sid, context, context_len);
+}
+#endif /* CONFIG_VENDOR_EDIT */
 /* SELinux requires early initialization in order to label
    all processes and objects when they are created. */
 security_initcall(selinux_init);
