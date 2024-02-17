@@ -408,6 +408,9 @@ static int dwc3_ep0_handle_status(struct dwc3 *dwc,
 	dwc->ep0_usb_req.request.length = sizeof(*response_pkt);
 	dwc->ep0_usb_req.request.buf = dwc->setup_buf;
 	dwc->ep0_usb_req.request.complete = dwc3_ep0_status_cmpl;
+#ifdef CONFIG_VENDOR_EDIT
+    dwc->ep0_usb_req.request.dma = DMA_ERROR_CODE;
+#endif
 
 	return __dwc3_gadget_ep0_queue(dep, &dwc->ep0_usb_req);
 }
@@ -722,6 +725,12 @@ static int dwc3_ep0_set_config(struct dwc3 *dwc, struct usb_ctrlrequest *ctrl)
 						DWC3_ENDPOINTS_NUM); num += 2) {
 				dep = dwc->eps[num];
 				size = 0;
+				/* Don't change TXFRAMNUM on usb31 version */
+				if (dwc3_is_usb31(dwc))
+					size = dwc3_readl(dwc->regs,
+						DWC3_GTXFIFOSIZ(num >> 1)) &
+						DWC31_GTXFIFOSIZ_TXFRAMNUM;
+
 				dwc3_writel(dwc->regs,
 					DWC3_GTXFIFOSIZ(num >> 1), size);
 				dep->fifo_depth = 0;
@@ -865,6 +874,10 @@ static int dwc3_ep0_set_sel(struct dwc3 *dwc, struct usb_ctrlrequest *ctrl)
 	dwc->ep0_usb_req.request.length = dep->endpoint.maxpacket;
 	dwc->ep0_usb_req.request.buf = dwc->setup_buf;
 	dwc->ep0_usb_req.request.complete = dwc3_ep0_set_sel_cmpl;
+
+#ifdef CONFIG_VENDOR_EDIT
+	dwc->ep0_usb_req.request.dma = DMA_ERROR_CODE;
+#endif /*CONFIG_VENDOR_EDIT*/
 
 	return __dwc3_gadget_ep0_queue(dep, &dwc->ep0_usb_req);
 }
