@@ -1417,7 +1417,11 @@ static enum d_walk_ret select_collect(void *_data, struct dentry *dentry)
 		goto out;
 
 	if (dentry->d_flags & DCACHE_SHRINK_LIST) {
+#ifdef CONFIG_VENDOR_EDIT
+		goto out;
+#else
 		data->found++;
+#endif
 	} else {
 		if (dentry->d_flags & DCACHE_LRU_LIST)
 			d_lru_del(dentry);

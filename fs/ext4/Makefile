@@ -13,3 +13,6 @@ ext4-y	:= balloc.o bitmap.o block_validity.o dir.o ext4_jbd2.o extents.o \
 
 ext4-$(CONFIG_EXT4_FS_POSIX_ACL)	+= acl.o
 ext4-$(CONFIG_EXT4_FS_SECURITY)		+= xattr_security.o
+#ifdef CONFIG_VENDOR_EDIT
+ext4-$(CONFIG_EXT4_ASYNC_DISCARD_SUPPORT)   += discard.o
+#endif

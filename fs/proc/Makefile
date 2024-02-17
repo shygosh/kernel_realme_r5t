@@ -33,3 +33,6 @@ proc-$(CONFIG_PROC_KCORE)	+= kcore.o
 proc-$(CONFIG_PROC_VMCORE)	+= vmcore.o
 proc-$(CONFIG_PRINTK)	+= kmsg.o
 proc-$(CONFIG_PROC_PAGE_MONITOR)	+= page.o
+#endif /* CONFIG_VENDOR_EDIT */
+proc-$(CONFIG_OPPO_FG_OPT)	+= fg_uid.o
+#endif /* CONFIG_VENDOR_EDIT */

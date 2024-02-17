@@ -32,7 +32,11 @@ source "fs/gfs2/Kconfig"
 source "fs/ocfs2/Kconfig"
 source "fs/btrfs/Kconfig"
 source "fs/nilfs2/Kconfig"
-source "fs/f2fs/Kconfig"
+#ifdef CONFIG_VENDOR_EDIT
+source "fs/of2fs/Kconfig"
+#else
+#source "fs/f2fs/Kconfig"
+#endif
 
 config FS_DAX
 	bool "Direct Access (DAX) support"
@@ -313,5 +317,9 @@ config FILE_TABLE_DEBUG
 	bool "Enable FILE_TABLE_DEBUG"
 	help
 	  This option enables debug of the open files using a global filetable
+
+#ifdef CONFIG_VENDOR_EDIT
+source "fs/exfat/Kconfig"
+#endif /*CONFIG_VENDOR_EDIT*/
 
 endmenu
