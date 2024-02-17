@@ -1,4 +1,22 @@
 # SPDX-License-Identifier: GPL-2.0
+ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
+	dtbo-$(CONFIG_ARCH_TRINKET) += trinket-idp-overlay-19743.dtbo
+	trinket-idp-overlay-19743.dtbo-base := trinket-19743.dtb
+	dtbo-$(CONFIG_ARCH_TRINKET) += trinket-idp-overlay-19632.dtbo
+	trinket-idp-overlay-19632.dtbo-base := trinket-19632.dtb
+	dtbo-$(CONFIG_ARCH_TRINKET) += trinket-idp-overlay-19631.dtbo
+	trinket-idp-overlay-19631.dtbo-base := trinket-19631.dtb
+else
+	dtb-$(CONFIG_ARCH_TRINKET)	+= trinket-idp-19631.dtb
+	dtb-$(CONFIG_ARCH_TRINKET)	+= trinket-idp-19632.dtb
+	dtb-$(CONFIG_ARCH_TRINKET)	+= trinket-idp-19743.dtb
+endif
+always		:= $(dtb-y)
+subdir-y	:= $(dts-dirs)
+clean-files	:= *.dtb *.dtbo
+
+ifneq ($(CONFIG_VENDOR_EDIT),y)
+
 dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-sbc.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= apq8096-db820c.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= ipq8074-hk01.dtb
@@ -395,3 +413,5 @@ dtbs: $(addprefix $(obj)/../,$(dtb-y))
 endif
 endif
 clean-files	:= *.dtb *.dtbo
+
+endif

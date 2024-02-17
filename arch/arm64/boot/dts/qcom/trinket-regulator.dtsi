@@ -306,6 +306,9 @@
 			regulator-min-microvolt = <1200000>;
 			regulator-max-microvolt = <1264000>;
 			qcom,init-voltage = <1200000>;
+//#ifdef CONFIG_ODM_WT_EDIT
+			regulator-always-on;
+//#endif /* CONFIG_ODM_WT_EDIT */
 			status = "okay";
 		};
 	};

@@ -79,11 +79,6 @@
 		qcom,msm-dai-q6-dev-id = <8>;
 	};
 
-	dai_hdmi_ms: qcom,msm-dai-q6-hdmi_ms {
-		compatible = "qcom,msm-dai-q6-hdmi";
-		qcom,msm-dai-q6-dev-id = <24578>;
-	};
-
 	dai_dp: qcom,msm-dai-q6-dp {
 		compatible = "qcom,msm-dai-q6-hdmi";
 		qcom,msm-dai-q6-dev-id = <24608>;
