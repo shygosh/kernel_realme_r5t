@@ -144,8 +144,8 @@
 			};
 		};
 	};
-
-	conn-therm-adc {
+//#ifdef CONFIG_VENDOR_EDIT
+/*	conn-therm-adc {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
 		thermal-governor = "user_space";
@@ -159,7 +159,8 @@
 			};
 		};
 	};
-
+*/
+//#endif
 	skin-therm-adc {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
