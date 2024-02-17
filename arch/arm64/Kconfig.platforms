@@ -212,6 +212,12 @@ config ARCH_TRINKET
 	  This enables support for the TRINKET chipset. If you do not
 	  wish to build a kernel that runs on this chipset, say 'N' here.
 
+config VENDOR_EDIT
+	def_bool y
+
+config ODM_WT_EDIT
+	def_bool y
+
 config ARCH_REALTEK
 	bool "Realtek Platforms"
 	help
