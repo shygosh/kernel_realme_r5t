@@ -104,6 +104,10 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/task.h>
 
+#ifdef CONFIG_VENDOR_EDIT
+#include <linux/oppocfs/oppo_cfs_fork.h>
+#endif
+
 /*
  * Minimum number of threads to boot the kernel
  */
@@ -722,6 +726,7 @@ static __latent_entropy int dup_mmap(struct mm_struct *mm,
 		if (retval)
 			goto out;
 	}
+
 	/* a new mm has just been created */
 	retval = arch_dup_mmap(oldmm, mm);
 out:
@@ -1745,6 +1750,14 @@ static __latent_entropy struct task_struct *copy_process(
 	p->sequential_io_avg	= 0;
 #endif
 
+#ifdef CONFIG_VENDOR_EDIT
+	init_task_ux_info(p);
+#endif
+
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
+    p->stuck_trace = 0;
+    memset(&p->oppo_stuck_info, 0, sizeof(struct oppo_uifirst_monitor_info));
+#endif
 	/* Perform scheduler related setup. Assign this task to a CPU. */
 	retval = sched_fork(clone_flags, p);
 	if (retval)
