@@ -2743,7 +2743,6 @@ void __do_SAK(struct tty_struct *tty)
 
 	if (!tty)
 		return;
-
 	spin_lock_irqsave(&tty->ctrl_lock, flags);
 	session = get_pid(tty->session);
 	spin_unlock_irqrestore(&tty->ctrl_lock, flags);
