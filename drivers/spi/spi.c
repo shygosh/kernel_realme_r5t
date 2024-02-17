@@ -3503,7 +3503,11 @@ static int __init spi_init(void)
 {
 	int	status;
 
+#ifndef CONFIG_VENDOR_EDIT
 	buf = kmalloc(SPI_BUFSIZ, GFP_KERNEL);
+#else
+	buf = kmalloc(SPI_BUFSIZ, GFP_KERNEL | GFP_DMA);
+#endif
 	if (!buf) {
 		status = -ENOMEM;
 		goto err0;
