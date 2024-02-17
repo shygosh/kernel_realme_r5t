@@ -45,6 +45,53 @@
 #include <linux/notifier.h>
 
 #include "irq-gic-common.h"
+#ifdef CONFIG_VENDOR_EDIT
+
+//add for modem wake up source
+#define WAKEUP_SOURCE_MODEM 					60	//qcom,glink-smem-native-xprt-modem
+#define WAKEUP_SOURCE_MODEM_IPA					119 //ipa
+#define WAKEUP_SOURCE_ADSP						61  //qcom,glink-smem-native-xprt-adsp
+#define WAKEUP_SOURCE_CDSP						62	//qcom,glink-smem-native-xprt-cdsp
+
+extern u64 wakeup_source_count_adsp ;
+extern u64 wakeup_source_count_cdsp;
+extern u64 wakeup_source_count_modem;
+extern u64 wakeup_source_count_all;
+
+#define MODEM_WAKEUP_SRC_NUM 3
+#define MODEM_DIAG_WS_INDEX 0
+#define MODEM_IPA_WS_INDEX 1
+#define MODEM_QMI_WS_INDEX 2
+
+#define WAKEUP_SOURCE_INT_FIRST		1
+#define WAKEUP_SOURCE_INT_SECOND	2
+
+extern int modem_wakeup_src_count[MODEM_WAKEUP_SRC_NUM];
+extern char modem_wakeup_src_string[MODEM_WAKEUP_SRC_NUM][10];
+#endif /* CONFIG_VENDOR_EDIT */
+
+#ifdef CONFIG_VENDOR_EDIT
+#define WLAN_WAKEUP_IRQ_NUMBER	725
+#define WAKEUP_SOURCE_WIFI_1ST 123
+#define WAKEUP_SOURCE_WIFI_2ND 129
+#define WAKEUP_SOURCE_WIFI_3RD 131
+#define WAKEUP_SOURCE_WIFI_4TH 134
+
+extern u64 wakeup_source_count_wifi ;
+#endif /*CONFIG_VENDOR_EDIT*/
+//Add for: print qrtr debug msg and fix QMI wakeup statistics for QCOM platforms using glink.
+//#ifdef CONFIG_VENDOR_EDIT
+#define GLINK_IRQ_NAME "glink-native"
+int qrtr_first_msg = 0;
+char qrtr_first_msg_details[256] = {0};
+char *sub_qrtr_first_msg_details = NULL;
+//#endif
+/* CONFIG_VENDOR_EDIT */
+
+#ifdef CONFIG_VENDOR_EDIT
+//Add irq of WiFi for SDM710
+static char WLAN_DATA_IRQ_NAME[]=     			"WLAN"; 		     //eg:WLAN_CE_0 ~WLAN_CE_11
+#endif /*CONFIG_VENDOR_EDIT*/
 
 struct redist_region {
 	void __iomem		*redist_base;
@@ -442,6 +489,9 @@ static void gic_show_resume_irq(struct gic_chip_data *gic)
 	u32 pending[32];
 	void __iomem *base = gic_data.dist_base;
 
+	#ifdef CONFIG_VENDOR_EDIT
+	wakeup_source_count_all++;
+	#endif /*CONFIG_VENDOR_EDIT*/
 	if (!msm_show_resume_irq_mask)
 		return;
 
@@ -463,7 +513,68 @@ static void gic_show_resume_irq(struct gic_chip_data *gic)
 		else if (desc->action && desc->action->name)
 			name = desc->action->name;
 
-		pr_warn("%s: %d triggered %s\n", __func__, irq, name);
+        #ifndef CONFIG_VENDOR_EDIT
+        pr_warn("%s: %d triggered %s\n", __func__, irq, name);
+        #else
+        if(name != NULL)
+        {
+            //#ifdef CONFIG_VENDOR_EDIT
+            //Add for: print qrtr debug msg and fix QMI wakeup statistics for QCOM platforms using glink
+            if (strncmp(name, GLINK_IRQ_NAME, strlen(GLINK_IRQ_NAME)) == 0) {
+                qrtr_first_msg = 1;
+            }
+            //#endif /* CONFIG_VENDOR_EDIT */
+            pr_warn("%s: %d triggered %s\n", __func__, irq, name);
+
+            #ifdef CONFIG_VENDOR_EDIT
+            //Add irq of WiFi for SDM710
+            if(strncmp(name, WLAN_DATA_IRQ_NAME, sizeof(WLAN_DATA_IRQ_NAME)-1) == 0)
+            {
+                wakeup_source_count_wifi++;
+            }
+            #endif //CONFIG_VENDOR_EDIT
+        }
+        #endif
+                #ifdef CONFIG_VENDOR_EDIT
+			if((irq  >= WAKEUP_SOURCE_WIFI_1ST && irq  <= WAKEUP_SOURCE_WIFI_2ND) ||
+				(irq  >= WAKEUP_SOURCE_WIFI_3RD && irq  <= WAKEUP_SOURCE_WIFI_4TH)) {
+				wakeup_source_count_wifi++;
+			}
+			if (irq == WLAN_WAKEUP_IRQ_NUMBER)
+		    {
+		    	#ifdef CONFIG_VENDOR_EDIT
+				// modem_wakeup_source = 0;
+				 //schedule_work(&wakeup_reason_work);
+			 	#endif
+			}
+		#endif //CONFIG_VENDOR_EDIT
+
+		#ifdef CONFIG_VENDOR_EDIT
+			if ((WAKEUP_SOURCE_MODEM == irq ) || (WAKEUP_SOURCE_MODEM_IPA == irq))
+			{
+				wakeup_source_count_modem++;
+				if(WAKEUP_SOURCE_MODEM == irq)
+				{
+					modem_wakeup_src_count[MODEM_QMI_WS_INDEX]++;
+				}else if (WAKEUP_SOURCE_MODEM_IPA == irq) {
+					modem_wakeup_src_count[MODEM_IPA_WS_INDEX]++;
+					#ifdef CONFIG_VENDOR_EDIT
+				 	// modem_wakeup_source = 0;
+					//schedule_work(&wakeup_reason_work);
+					#endif
+				}
+			}
+		//Yongyao.Song add end
+		#endif /*CONFIG_VENDOR_EDIT*/
+
+		#ifdef CONFIG_VENDOR_EDIT
+	        if(WAKEUP_SOURCE_ADSP == irq) {
+				wakeup_source_count_adsp++;
+			}
+	        if(WAKEUP_SOURCE_CDSP == irq) {
+	           wakeup_source_count_cdsp++;
+			}
+	    #endif
 	}
 }
 
@@ -688,11 +799,17 @@ static int __gic_populate_rdist(struct redist_region *region, void __iomem *ptr)
 		u64 offset = ptr - region->redist_base;
 		gic_data_rdist_rd_base() = ptr;
 		gic_data_rdist()->phys_base = region->phys_base + offset;
-
+#ifndef CONFIG_VENDOR_EDIT
 		pr_info("CPU%d: found redistributor %lx region %d:%pa\n",
 			smp_processor_id(), mpidr,
 			(int)(region - gic_data.redist_regions),
 			&gic_data_rdist()->phys_base);
+#else
+		pr_debug("CPU%d: found redistributor %lx region %d:%pa\n",
+			smp_processor_id(), mpidr,
+			(int)(region - gic_data.redist_regions),
+			&gic_data_rdist()->phys_base);
+#endif
 		return 0;
 	}
 
