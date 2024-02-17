@@ -251,6 +251,10 @@ struct ion_heap {
 	int (*debug_show)(struct ion_heap *heap, struct seq_file *, void *);
 };
 
+#ifdef CONFIG_VENDOR_EDIT
+unsigned long ion_total(void);
+#endif /*CONFIG_VENDOR_EDIT*/
+
 /**
  * ion_buffer_cached - this ion buffer is cached
  * @buffer:		buffer
