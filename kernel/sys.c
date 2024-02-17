@@ -1469,6 +1469,9 @@ int do_prlimit(struct task_struct *tsk, unsigned int resource,
 {
 	struct rlimit *rlim;
 	int retval = 0;
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
+	int rt_changed = 0;
+#endif
 
 	if (resource >= RLIM_NLIMITS)
 		return -EINVAL;

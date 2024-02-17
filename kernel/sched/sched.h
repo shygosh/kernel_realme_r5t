@@ -955,6 +955,12 @@ struct rq {
 	struct cpuidle_state *idle_state;
 	int idle_state_idx;
 #endif
+#ifdef CONFIG_VENDOR_EDIT
+    struct list_head ux_thread_list;
+    int active_ux_balance;
+    struct cpu_stop_work ux_balance_work;
+#endif /* CONFIG_VENDOR_EDIT */
+
 };
 
 static inline int cpu_of(struct rq *rq)
@@ -2857,11 +2863,15 @@ static inline enum sched_boost_policy sched_boost_policy(void)
 }
 
 extern unsigned int sched_boost_type;
+#ifdef CONFIG_VENDOR_EDIT
+//cuixiaogang@SRC.hypnus. remove this inline function for hypnus feature
+extern int sched_boost(void);
+#else
 static inline int sched_boost(void)
 {
 	return sched_boost_type;
 }
-
+#endif /* CONFIG_VENDOR_EDIT */
 extern int preferred_cluster(struct sched_cluster *cluster,
 						struct task_struct *p);
 extern struct sched_cluster *rq_cluster(struct rq *rq);

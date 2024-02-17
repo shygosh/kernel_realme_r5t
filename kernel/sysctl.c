@@ -70,6 +70,10 @@
 #include <linux/uaccess.h>
 #include <asm/processor.h>
 
+#ifdef CONFIG_VENDOR_EDIT
+#include <linux/kernel_stat.h>
+#endif /* CONFIG_VENDOR_EDIT */
+
 #ifdef CONFIG_X86
 #include <asm/nmi.h>
 #include <asm/stacktrace.h>
@@ -130,17 +134,35 @@ static int __maybe_unused four = 4;
 static unsigned long zero_ul;
 static unsigned long one_ul = 1;
 static unsigned long long_max = LONG_MAX;
+
 static int one_hundred = 100;
 static int one_thousand = 1000;
 #ifdef CONFIG_SCHED_WALT
 static int two_million = 2000000;
 #endif
+#ifdef CONFIG_VENDOR_EDIT
+unsigned int sysctl_fg_io_opt = 1;
+#endif /*CONFIG_VENDOR_EDIT*/
+
+//#ifdef COLOROS_EDIT
+int sysctl_ed_task_enabled = 1;
+//#endif /*COLOROS_EDIT*/
+
+#ifdef CONFIG_VENDOR_EDIT
+unsigned int sysctl_ext4_fsync_enable = 1;
+unsigned int ext4_fsync_enable_status = 0;
+#endif /*CONFIG_VENDOR_EDIT*/
+#ifdef CONFIG_VENDOR_EDIT
+unsigned long sysctl_blkdev_issue_flush_count = 0;
+#endif /*CONFIG_VENDOR_EDIT*/
+
 #ifdef CONFIG_PRINTK
 static int ten_thousand = 10000;
 #endif
 #ifdef CONFIG_PERF_EVENTS
 static int six_hundred_forty_kb = 640 * 1024;
 #endif
+
 static int two_hundred_fifty_five = 255;
 
 /* this is needed for the proc_doulongvec_minmax of vm_dirty_bytes */
@@ -156,6 +178,9 @@ static const int cap_last_cap = CAP_LAST_CAP;
 /*this is needed for proc_doulongvec_minmax of sysctl_hung_task_timeout_secs */
 #ifdef CONFIG_DETECT_HUNG_TASK
 static unsigned long hung_task_timeout_max = (LONG_MAX/HZ);
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_DEATH_HEALER)
+static int five = 5;
+#endif
 #endif
 
 #ifdef CONFIG_INOTIFY_USER
@@ -305,6 +330,11 @@ static int max_sched_tunable_scaling = SCHED_TUNABLESCALING_END-1;
 #endif /* CONFIG_SMP */
 #endif /* CONFIG_SCHED_DEBUG */
 
+#ifdef CONFIG_VENDOR_EDIT
+int sysctl_uifirst_enabled = 1;
+int sysctl_launcher_boost_enabled = 0;
+#endif /* CONFIG_VENDOR_EDIT */
+
 #ifdef CONFIG_COMPACTION
 static int min_extfrag_threshold;
 static int max_extfrag_threshold = 1000;
@@ -439,6 +469,43 @@ static struct ctl_table kern_table[] = {
 		.mode		= 0644,
 		.proc_handler	= sched_updown_migrate_handler,
 	},
+#ifdef CONFIG_VENDOR_EDIT
+{
+		.procname	= "fg_io_opt",
+		.data		= &sysctl_fg_io_opt,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec,
+},
+#endif
+//#ifdef COLOROS_EDIT
+{
+        .procname   = "ed_task_enabled",
+        .data       = &sysctl_ed_task_enabled,
+        .maxlen     = sizeof(int),
+        .mode       = 0666,
+        .proc_handler = proc_dointvec,
+},
+//#endif
+#ifdef CONFIG_VENDOR_EDIT
+{
+		.procname	= "ext4_fsync_enable",
+		.data		= &sysctl_ext4_fsync_enable,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0666,
+		.proc_handler	= proc_dointvec,
+},
+#endif
+#ifdef CONFIG_VENDOR_EDIT
+{
+		.procname	= "blkdev_issue_flush_count",
+		.data		= &sysctl_blkdev_issue_flush_count,
+		.maxlen		= sizeof(unsigned long),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec,
+},
+#endif
+
 #ifdef CONFIG_SCHED_DEBUG
 	{
 		.procname	= "sched_min_granularity_ns",
@@ -1252,6 +1319,24 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec_minmax,
 		.extra1		= &neg_one,
 	},
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_DEATH_HEALER)
+	{
+		.procname	= "hung_task_oppo_kill",
+		.data		= &sysctl_hung_task_oppo_kill,
+		.maxlen		= 128,
+		.mode		= 0666,
+		.proc_handler	= proc_dostring,
+	},
+
+	{
+		.procname	= "hung_task_maxiowait_count",
+		.data		= &sysctl_hung_task_maxiowait_count,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &five,
+	},
+#endif
 	{
 		.procname	= "hung_task_selective_monitoring",
 		.data		= &sysctl_hung_task_selective_monitoring,
@@ -1403,6 +1488,22 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec,
 	},
 #endif
+#ifdef CONFIG_VENDOR_EDIT
+	{
+		.procname	= "uifirst_enabled",
+		.data		= &sysctl_uifirst_enabled,
+		.maxlen 	= sizeof(int),
+		.mode		= 0666,
+		.proc_handler = proc_dointvec,
+	},
+	{
+		.procname	= "launcher_boost_enabled",
+		.data		= &sysctl_launcher_boost_enabled,
+		.maxlen 	= sizeof(int),
+		.mode		= 0666,
+		.proc_handler = proc_dointvec,
+	},
+#endif /* CONFIG_VENDOR_EDIT */
 	{ }
 };
 
@@ -1608,7 +1709,11 @@ static struct ctl_table vm_table[] = {
 		.procname	= "compact_memory",
 		.data		= &sysctl_compact_memory,
 		.maxlen		= sizeof(int),
+#ifdef CONFIG_VENDOR_EDIT
+		.mode		= 0222,
+#else
 		.mode		= 0200,
+#endif /*CONFIG_VENDOR_EDIT*/
 		.proc_handler	= sysctl_compaction_handler,
 	},
 	{
