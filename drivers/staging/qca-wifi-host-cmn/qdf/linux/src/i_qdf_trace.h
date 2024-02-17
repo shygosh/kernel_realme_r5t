@@ -187,7 +187,7 @@ static inline void __qdf_trace_noop(QDF_MODULE_ID module, char *format, ...) { }
 #define QDF_TRACE_DEBUG_RL_NO_FL(params...) __qdf_trace_noop(params)
 #endif
 
-#define QDF_ENABLE_TRACING
+// #define QDF_ENABLE_TRACING
 #define qdf_scnprintf scnprintf
 
 #ifdef QDF_ENABLE_TRACING
