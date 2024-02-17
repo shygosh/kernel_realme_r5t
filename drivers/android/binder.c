@@ -77,6 +77,14 @@
 #include "binder_alloc.h"
 #include "binder_trace.h"
 
+#ifdef CONFIG_VENDOR_EDIT
+#include <linux/oppocfs/oppo_cfs_binder.h>
+#endif
+
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HANS)
+#include <linux/hans.h>
+#endif
+
 static HLIST_HEAD(binder_deferred_list);
 static DEFINE_MUTEX(binder_deferred_lock);
 
@@ -2899,6 +2907,11 @@ static bool binder_proc_transaction(struct binder_transaction *t,
 		binder_transaction_priority(thread->task, t, node_prio,
 					    node->inherit_rt);
 		binder_enqueue_thread_work_ilocked(thread, &t->work);
+#ifdef CONFIG_VENDOR_EDIT
+		if (!oneway) {
+	        binder_thread_check_and_set_dynamic_ux(thread->task, t->from->task);
+	    }
+#endif
 	} else if (!pending_async) {
 		binder_enqueue_work_ilocked(&t->work, &proc->todo);
 	} else {
@@ -2982,6 +2995,13 @@ static void binder_transaction(struct binder_proc *proc,
 	int t_debug_id = atomic_inc_return(&binder_last_id);
 	char *secctx = NULL;
 	u32 secctx_sz = 0;
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HANS)
+	char buf_data[INTERFACETOKEN_BUFF_SIZE];
+	size_t buf_data_size;
+	char buf[INTERFACETOKEN_BUFF_SIZE] = {0};
+	int i = 0;
+	int j = 0;
+#endif
 
 	e = binder_transaction_log_add(&binder_transaction_log);
 	e->debug_id = t_debug_id;
@@ -3097,6 +3117,16 @@ static void binder_transaction(struct binder_proc *proc,
 			return_error_line = __LINE__;
 			goto err_dead_binder;
 		}
+
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HANS)
+		if (!(tr->flags & TF_ONE_WAY) //report sync binder call
+			&& target_proc
+			&& (task_uid(target_proc->tsk).val > MIN_USERAPP_UID)
+			&& (proc->pid != target_proc->pid)
+			&& is_frozen_tg(target_proc->tsk)) {
+			hans_report(SYNC_BINDER, task_tgid_nr(proc->tsk), task_uid(target_proc->tsk).val, "SYNC_BINDER", -1);
+		}
+#endif
 		e->to_node = target_node->debug_id;
 		if (security_binder_transaction(proc->tsk,
 						target_proc->tsk) < 0) {
@@ -3297,6 +3327,31 @@ static void binder_transaction(struct binder_proc *proc,
 		return_error_line = __LINE__;
 		goto err_bad_offset;
 	}
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HANS)
+	if ((tr->flags & TF_ONE_WAY) //report async binder call
+		&& target_proc
+		&& (task_uid(target_proc->tsk).val > MIN_USERAPP_UID)
+		&& (proc->pid != target_proc->pid)
+		&& is_frozen_tg(target_proc->tsk)) {
+		buf_data_size = tr->data_size>INTERFACETOKEN_BUFF_SIZE ?INTERFACETOKEN_BUFF_SIZE:tr->data_size;
+		if (!copy_from_user(buf_data, (char*)tr->data.ptr.buffer, buf_data_size)) {
+			//1.skip first PARCEL_OFFSET bytes (useless data)
+			//2.make sure the invalid address issue is not occuring(j =PARCEL_OFFSET+1, j+=2)
+			//3.java layer uses 2 bytes char. And only the first bytes has the data.(p+=2)
+			if (buf_data_size > PARCEL_OFFSET) {
+				char *p = (char *)(buf_data) + PARCEL_OFFSET;
+				j = PARCEL_OFFSET + 1;
+				while (i < INTERFACETOKEN_BUFF_SIZE && j < buf_data_size && *p != '\0') {
+					buf[i++] = *p;
+					j += 2;
+					p += 2;
+				}
+				if (i == INTERFACETOKEN_BUFF_SIZE) buf[i-1] = '\0';
+			}
+			hans_report(ASYNC_BINDER, task_tgid_nr(proc->tsk), task_uid(target_proc->tsk).val, buf, tr->code);
+		}
+	}
+#endif
 	off_start_offset = ALIGN(tr->data_size, sizeof(void *));
 	buffer_offset = off_start_offset;
 	off_end_offset = off_start_offset + tr->offsets_size;
@@ -3387,7 +3442,7 @@ static void binder_transaction(struct binder_proc *proc,
 			binder_size_t parent_offset;
 			struct binder_fd_array_object *fda =
 				to_binder_fd_array_object(hdr);
-			size_t num_valid = (buffer_offset - off_start_offset) *
+			size_t num_valid = (buffer_offset - off_start_offset) /
 						sizeof(binder_size_t);
 			struct binder_buffer_object *parent =
 				binder_validate_ptr(target_proc, t->buffer,
@@ -3461,7 +3516,7 @@ static void binder_transaction(struct binder_proc *proc,
 				t->buffer->user_data + sg_buf_offset;
 			sg_buf_offset += ALIGN(bp->length, sizeof(u64));
 
-			num_valid = (buffer_offset - off_start_offset) *
+			num_valid = (buffer_offset - off_start_offset) /
 					sizeof(binder_size_t);
 			ret = binder_fixup_parent(t, thread, bp,
 						  off_start_offset,
@@ -3491,6 +3546,9 @@ static void binder_transaction(struct binder_proc *proc,
 	}
 	tcomplete->type = BINDER_WORK_TRANSACTION_COMPLETE;
 	t->work.type = BINDER_WORK_TRANSACTION;
+#ifdef CONFIG_VENDOR_EDIT
+		binder_thread_check_and_remove_dynamic_ux(thread->task);
+#endif
 
 	if (reply) {
 		binder_enqueue_thread_work(thread, tcomplete);
@@ -4146,7 +4204,13 @@ static int binder_wait_for_work(struct binder_thread *thread,
 			list_add(&thread->waiting_thread_node,
 				 &proc->waiting_threads);
 		binder_inner_proc_unlock(proc);
-		schedule();
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
+        current->in_binder = 1;
+#endif
+        schedule();
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
+        current->in_binder = 0;
+#endif
 		binder_inner_proc_lock(proc);
 		list_del_init(&thread->waiting_thread_node);
 		if (signal_pending(current)) {
@@ -4439,6 +4503,10 @@ retry:
 			trd->sender_pid =
 				task_tgid_nr_ns(sender,
 						task_active_pid_ns(current));
+#ifdef CONFIG_VENDOR_EDIT
+			binder_thread_check_and_set_dynamic_ux(thread->task, t_from->task);
+#endif
+
 		} else {
 			trd->sender_pid = 0;
 		}
@@ -5905,6 +5973,71 @@ static int binder_state_show(struct seq_file *m, void *unused)
 
 	return 0;
 }
+
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HANS)
+static void hans_check_uid_proc_status(struct binder_proc *proc)
+{
+	struct rb_node *n = NULL;
+	struct binder_thread *thread = NULL;
+	int uid = -1;
+	struct binder_transaction *btrans = NULL;
+	bool empty = true;
+
+	//check binder_thread/transaction_stack/binder_proc ongoing transaction
+	binder_inner_proc_lock(proc);
+	for (n = rb_first(&proc->threads); n != NULL; n = rb_next(n)) {
+		thread = rb_entry(n, struct binder_thread, rb_node);
+		empty = binder_worklist_empty_ilocked(&thread->todo);
+
+		if (thread->task != NULL) {
+			// has "todo" binder thread in worklist?
+			uid = task_uid(thread->task).val;
+			if (!empty) {
+				binder_inner_proc_unlock(proc);
+				hans_report(FROZEN_TRANS, -1, uid, "FROZEN_TRANS_THREAD", -1);
+				return;
+			}
+
+			// has transcation in transaction_stack?
+			btrans = thread->transaction_stack;
+			if (btrans) {
+				spin_lock(&btrans->lock);
+				if (btrans->to_thread == thread) {
+					// only report incoming binder call
+					spin_unlock(&btrans->lock);
+					binder_inner_proc_unlock(proc);
+					hans_report(FROZEN_TRANS, -1, uid, "FROZEN_TRANS_STACK", -1);
+					return;
+				}
+				spin_unlock(&btrans->lock);
+			}
+		}
+	}
+
+	// has "todo" binder proc in worklist
+	empty = binder_worklist_empty_ilocked(&proc->todo);
+	if (proc->tsk != NULL && !empty) {
+		uid = task_uid(proc->tsk).val;
+		binder_inner_proc_unlock(proc);
+		hans_report(FROZEN_TRANS, -1, uid, "FROZEN_TRANS_PROC", -1);
+		return;
+	}
+	binder_inner_proc_unlock(proc);
+}
+
+void hans_check_frozen_transcation(uid_t uid)
+{
+	struct binder_proc *proc;
+
+	mutex_lock(&binder_procs_lock);
+	hlist_for_each_entry(proc, &binder_procs, proc_node) {
+		if (proc != NULL && (task_uid(proc->tsk).val == uid)) {
+			hans_check_uid_proc_status(proc);
+		}
+	}
+	mutex_unlock(&binder_procs_lock);
+}
+#endif
 
 static int binder_stats_show(struct seq_file *m, void *unused)
 {
