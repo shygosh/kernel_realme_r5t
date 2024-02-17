@@ -143,6 +143,11 @@
 #include <linux/hrtimer.h>
 #include <linux/netfilter_ingress.h>
 #include <linux/crash_dump.h>
+#ifdef CONFIG_VENDOR_EDIT
+//Add for limit speed function
+#include <linux/imq.h>
+#endif /* CONFIG_VENDOR_EDIT */
+
 #include <linux/sctp.h>
 #include <net/udp_tunnel.h>
 #include <linux/tcp.h>
@@ -3003,7 +3008,14 @@ static int xmit_one(struct sk_buff *skb, struct net_device *dev,
 	unsigned int len;
 	int rc;
 
+#ifdef CONFIG_VENDOR_EDIT
+//Add for limit speed function
+	if ((!list_empty(&ptype_all) || !list_empty(&dev->ptype_all)) &&
+		!(skb->imq_flags & IMQ_F_ENQUEUE))
+#else /* CONFIG_VENDOR_EDIT */
 	if (!list_empty(&ptype_all) || !list_empty(&dev->ptype_all))
+#endif /* CONFIG_VENDOR_EDIT */
+
 		dev_queue_xmit_nit(skb, dev);
 
 	len = skb->len;
@@ -3041,6 +3053,11 @@ out:
 	*ret = rc;
 	return skb;
 }
+
+#ifdef CONFIG_VENDOR_EDIT
+//Add for limit speed function
+EXPORT_SYMBOL_GPL(dev_hard_start_xmit);
+#endif /* CONFIG_VENDOR_EDIT */
 
 static struct sk_buff *validate_xmit_vlan(struct sk_buff *skb,
 					  netdev_features_t features)
