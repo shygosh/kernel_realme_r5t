@@ -259,6 +259,9 @@ struct ufs_desc_size {
 	int interc_desc;
 	int unit_desc;
 	int conf_desc;
+#ifdef CONFIG_VENDOR_EDIT
+        int hlth_desc;
+#endif
 };
 
 /**
