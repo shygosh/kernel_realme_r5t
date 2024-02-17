@@ -203,6 +203,51 @@ struct task_group;
 
 #endif
 
+#ifdef CONFIG_VENDOR_EDIT
+enum DYNAMIC_UX_TYPE
+{
+    DYNAMIC_UX_BINDER = 0,
+    DYNAMIC_UX_RWSEM,
+    DYNAMIC_UX_MUTEX,
+    DYNAMIC_UX_SEM,
+    DYNAMIC_UX_FUTEX,
+    DYNAMIC_UX_MAX,
+};
+
+#define UX_MSG_LEN 64
+#define UX_DEPTH_MAX 2
+
+extern int sysctl_uifirst_enabled;
+extern int sysctl_launcher_boost_enabled;
+#endif /* CONFIG_VENDOR_EDIT */
+
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
+struct uifirst_d_state {
+    u64 iowait_ns;
+    u64 downread_ns;
+    u64 downwrite_ns;
+    u64 mutex_ns;
+    u64 other_ns;
+    int cnt;
+};
+
+struct uifirst_s_state{
+    u64 binder_ns;
+    u64 epoll_ns;
+    u64 futex_ns;
+    u64 other_ns;
+    int cnt;
+};
+
+struct oppo_uifirst_monitor_info {
+    u64 runnable_state;
+    u64 ltt_running_state; /* ns */
+    u64 big_running_state; /* ns */
+    struct uifirst_d_state d_state;
+    struct uifirst_s_state s_state;
+};
+#endif
+
 /* Task command name length: */
 #define TASK_COMM_LEN			16
 
@@ -543,8 +588,33 @@ struct cpu_cycle_counter_cb {
 #define MAX_NUM_CGROUP_COLOC_ID	20
 
 extern DEFINE_PER_CPU_READ_MOSTLY(int, sched_load_boost);
+#ifdef CONFIG_SMP
+#ifdef CONFIG_VENDOR_EDIT
+extern unsigned long sched_get_capacity_orig(int cpu);
+extern unsigned int sched_get_cpu_util(int cpu);
+#endif
+#else
+#ifdef CONFIG_VENDOR_EDIT
+static inline unsigned long sched_get_capacity_orig(int cpu)
+{
+	return 0;
+}
+
+static inline unsigned int sched_get_cpu_util(int cpu)
+{
+	return 0;
+}
+#endif
+#endif
+
 
 #ifdef CONFIG_SCHED_WALT
+#ifdef CONFIG_VENDOR_EDIT
+extern int sched_boost(void);
+extern int sched_set_updown_migrate(unsigned int *up_pct, unsigned int *down_pct);
+extern int sched_get_updown_migrate(unsigned int *up_pct, unsigned int *down_pct);
+void sched_boost_disable_all(void);
+#endif /* CONFIG_VENDOR_EDIT */
 extern void sched_exit(struct task_struct *p);
 extern int register_cpu_cycle_counter_cb(struct cpu_cycle_counter_cb *cb);
 extern void sched_set_io_is_busy(int val);
@@ -1348,7 +1418,24 @@ struct task_struct {
 	/* Used by LSM modules for access restriction: */
 	void				*security;
 #endif
-
+#ifdef CONFIG_VENDOR_EDIT
+	int static_ux;
+	atomic64_t dynamic_ux;
+	struct list_head ux_entry;
+	int ux_depth;
+	u64 enqueue_time;
+	u64 dynamic_ux_start;
+#endif /* CONFIG_VENDOR_EDIT */
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
+    int stuck_trace;
+    struct oppo_uifirst_monitor_info oppo_stuck_info;
+    unsigned in_mutex:1;
+    unsigned in_downread:1;
+    unsigned in_downwrite:1;
+    unsigned in_futex:1;
+    unsigned in_binder:1;
+    unsigned in_epoll:1;
+#endif
 	/*
 	 * New fields for task_struct should be added above here, so that
 	 * they are included in the randomized portion of task_struct.

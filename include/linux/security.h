@@ -1811,5 +1811,15 @@ static inline void free_secdata(void *secdata)
 { }
 #endif /* CONFIG_SECURITY */
 
+#ifdef CONFIG_VENDOR_EDIT
+#ifdef CONFIG_SECURITY
+extern int get_current_security_context(char **context, u32 *context_len);
+#else
+static inline int get_current_security_context(char **context, u32 *context_len)
+{
+	return -EOPNOTSUPP;
+}
+#endif
+#endif /* CONFIG_VENDOR_EDIT */
 #endif /* ! __LINUX_SECURITY_H */
 
