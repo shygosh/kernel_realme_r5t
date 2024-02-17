@@ -863,6 +863,33 @@ static int show_smap(struct seq_file *m, void *v, int is_pid)
 	/* mmap_sem is held in m_start */
 	walk_page_vma(vma, &smaps_walk);
 
+    #ifdef CONFIG_VENDOR_EDIT
+	if (strcmp(current->comm, "android.bg") == 0) {
+		if ((unsigned long)(mss->pss >> (10 + PSS_SHIFT)) > 0) {
+			seq_printf(m,
+				"Pss:            %8lu kB\n",
+			(	unsigned long)(mss->pss >> (10 + PSS_SHIFT)));
+		}
+		if ((mss->private_clean >> 10) > 0) {
+			seq_printf(m,
+				"Private_Clean:  %8lu kB\n",
+				mss->private_clean >> 10);
+		}
+		if ((mss->private_dirty >> 10) > 0) {
+			seq_printf(m,
+				"Private_Dirty:  %8lu kB\n",
+				mss->private_dirty >> 10);
+		}
+		if ((unsigned long)(mss->swap_pss >> (10 + PSS_SHIFT)) > 0) {
+                       seq_printf(m,
+                       "SwapPss:        %8lu kB\n",
+                       (unsigned long)(mss->swap_pss >> (10 + PSS_SHIFT)));
+		}
+		m_cache_vma(m, vma);
+		return 0;
+	}
+    #endif /*CONFIG_VENDOR_EDIT*/
+
 	if (!rollup_mode) {
 		show_map_vma(m, vma, is_pid);
 		if (vma_get_anon_name(vma)) {
@@ -1733,6 +1760,7 @@ cont:
 	}
 	pte_unmap_unlock(pte - 1, ptl);
 	reclaimed = reclaim_pages_from_list(&page_list, vma);
+
 	rp->nr_reclaimed += reclaimed;
 	rp->nr_to_reclaim -= reclaimed;
 	if (rp->nr_to_reclaim < 0)
@@ -1917,12 +1945,12 @@ out:
 out_err:
 	return -EINVAL;
 }
+#endif /* CONFIG_VENDOR_EDIT */
 
 const struct file_operations proc_reclaim_operations = {
 	.write		= reclaim_write,
 	.llseek		= noop_llseek,
 };
-#endif
 
 #ifdef CONFIG_NUMA
 

@@ -19,6 +19,13 @@
 #include <asm/page.h>
 #include <asm/pgtable.h>
 #include "internal.h"
+#ifdef CONFIG_VENDOR_EDIT
+#include <linux/oppo_ion.h>
+#endif /*CONFIG_VENDOR_EDIT*/
+
+#ifdef CONFIG_VENDOR_EDIT
+extern unsigned long gpu_total(void);
+#endif /*CONFIG_VENDOR_EDIT*/
 
 void __attribute__((weak)) arch_report_meminfo(struct seq_file *m)
 {
@@ -154,6 +161,13 @@ static int meminfo_proc_show(struct seq_file *m, void *v)
 	show_val_kb(m, "CmaFree:        ",
 		    global_zone_page_state(NR_FREE_CMA_PAGES));
 #endif
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_ION)
+			show_val_kb(m, "IonTotalCache:  ", global_zone_page_state(NR_IONCACHE_PAGES));
+    	show_val_kb(m, "IonTotalUsed:   ", ion_total() >> PAGE_SHIFT);
+#endif /*CONFIG_VENDOR_EDIT*/
+#ifdef CONFIG_VENDOR_EDIT
+	show_val_kb(m, "GPUTotalUsed:   ", gpu_total() >> PAGE_SHIFT);
+#endif /*CONFIG_VENDOR_EDIT*/
 
 	hugetlb_report_meminfo(m);
 
