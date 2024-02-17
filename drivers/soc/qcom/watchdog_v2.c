@@ -36,6 +36,10 @@
 #include <linux/cpumask.h>
 #include <uapi/linux/sched/types.h>
 
+#ifdef CONFIG_VENDOR_EDIT
+#include "oppo_watchdog_util.h"
+#endif
+
 #define MODULE_NAME "msm_watchdog"
 #define WDT0_ACCSCSSNBARK_INT 0
 #define TCSR_WDT_CFG	0x30
@@ -57,7 +61,7 @@
 
 static struct msm_watchdog_data *wdog_data;
 
-static int cpu_idle_pc_state[NR_CPUS];
+int cpu_idle_pc_state[NR_CPUS];
 
 /*
  * user_pet_enable:
@@ -394,15 +398,26 @@ static void ping_other_cpus(struct msm_watchdog_data *wdog_dd)
 {
 	int cpu;
 
+#ifdef CONFIG_VENDOR_EDIT
+	cpumask_t mask;
+	get_cpu_ping_mask(&mask);
+#endif /*CONFIG_VENDOR_EDIT*/
 	cpumask_clear(&wdog_dd->alive_mask);
 	/* Make sure alive mask is cleared and set in order */
 	smp_mb();
+#ifdef CONFIG_VENDOR_EDIT
+	for_each_cpu(cpu, &mask) {
+#else
 	for_each_cpu(cpu, cpu_online_mask) {
 		if (!cpu_idle_pc_state[cpu] && !cpu_isolated(cpu)) {
+#endif /*CONFIG_VENDOR_EDIT*/
 			wdog_dd->ping_start[cpu] = sched_clock();
 			smp_call_function_single(cpu, keep_alive_response,
 						 wdog_dd, 1);
+#ifdef CONFIG_VENDOR_EDIT
+#else
 		}
+#endif /*CONFIG_VENDOR_EDIT*/
 	}
 }
 
@@ -449,6 +464,9 @@ static __ref int watchdog_kthread(void *arg)
 			delay_time = msecs_to_jiffies(wdog_dd->pet_time);
 			pet_watchdog(wdog_dd);
 		}
+#ifdef CONFIG_VENDOR_EDIT
+		reset_recovery_tried();
+#endif
 		/* Check again before scheduling
 		 * Could have been changed on other cpu
 		 */
@@ -537,10 +555,27 @@ static irqreturn_t wdog_bark_handler(int irq, void *dev_id)
 	nanosec_rem = do_div(wdog_dd->last_pet, 1000000000);
 	dev_info(wdog_dd->dev, "Watchdog last pet at %lu.%06lu\n",
 			(unsigned long) wdog_dd->last_pet, nanosec_rem / 1000);
-	if (wdog_dd->do_ipi_ping)
+	if (wdog_dd->do_ipi_ping){
 		dump_cpu_alive_mask(wdog_dd);
+#ifdef CONFIG_VENDOR_EDIT
+		dump_cpu_online_mask();
+#endif
+	}
+#ifdef CONFIG_VENDOR_EDIT
+	if (try_to_recover_pending(wdog_dd->watchdog_task)) {
+		pet_watchdog(wdog_dd);
+		return IRQ_HANDLED;
+	}
+
+	print_smp_call_cpu();
+	dump_wdog_cpu(wdog_dd->watchdog_task);
+#endif
+#ifdef CONFIG_VENDOR_EDIT
+	panic("Handle a watchdog bite! - Falling back to kernel panic!");
+#else
 	msm_trigger_wdog_bite();
 	panic("Failed to cause a watchdog bite! - Falling back to kernel panic!");
+#endif
 	return IRQ_HANDLED;
 }
 
@@ -914,6 +949,13 @@ static int msm_watchdog_probe(struct platform_device *pdev)
 	md_entry.size = sizeof(*wdog_dd);
 	if (msm_minidump_add_region(&md_entry))
 		pr_info("Failed to add Watchdog data in Minidump\n");
+
+#ifdef CONFIG_VENDOR_EDIT
+        ret = init_oppo_watchlog();
+        if (ret < 0) {
+                pr_info("Failed to init oppo watchlog");
+        }
+#endif
 
 	return 0;
 err:
