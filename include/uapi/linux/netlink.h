@@ -30,9 +30,23 @@
 #define NETLINK_CRYPTO		21	/* Crypto layer */
 #define NETLINK_SMC		22	/* SMC monitoring */
 #define NETLINK_SOCKEV		23	/* Socket Administrative Events */
+#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HANS)
+#define NETLINK_OPPO_HANS       28      /* Socket for freezing solution*/
+#endif
 #define NETLINK_INET_DIAG	NETLINK_SOCK_DIAG
 
-#define MAX_LINKS 32		
+#ifndef CONFIG_VENDOR_EDIT
+//Add for WeChat lucky money recognition
+#define MAX_LINKS 32
+#else /* CONFIG_VENDOR_EDIT */
+#define NETLINK_OPPO_NF_HOOKS	32	/*OPPO netfilter hooks*/
+
+//#ifdef CONFIG_VENDOR_EDIT
+//Add code for appo sla function
+#define NETLINK_OPPO_SLA  33      /*SLA NETLINK SOCK*/
+//#endif /* CONFIG_VENDOR_EDIT */
+#define MAX_LINKS 37
+#endif /* CONFIG_VENDOR_EDIT */
 
 struct sockaddr_nl {
 	__kernel_sa_family_t	nl_family;	/* AF_NETLINK	*/
