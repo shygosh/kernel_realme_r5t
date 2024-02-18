@@ -1183,6 +1183,23 @@ config CC_OPTIMIZE_FOR_PERFORMANCE
 	  with the "-O2" compiler flag for best performance and most
 	  helpful compile-time warnings.
 
+config CC_OPTIMIZE_FOR_CPU
+	bool "Optimize for performance and specific CPU model"
+	help
+	  Enabling this option will pass the "-O3" flag to your compiler.
+	  If CC_OPTIMIZE_FOR_CPU_MODEL is specified, this will also pass the
+	  flag '-mcpu=str' where str is your CPU model. This will allow the
+	  compiler to optimize code generation for a specific CPU model.
+	  Otherwise the default value 'generic' will be used instead.
+
+if CC_OPTIMIZE_FOR_CPU
+
+config CC_OPTIMIZE_FOR_CPU_MODEL
+	string "The CPU model to optimize for"
+	default "generic"
+
+endif
+
 config CC_OPTIMIZE_FOR_SIZE
 	bool "Optimize for size"
 	help
