@@ -74,8 +74,6 @@ static void patch_sar_flags(char *cmd)
 {
 	patch_flag_remove_flag(cmd, "root=PARTUUID=");
 	patch_flag_remove_flag(cmd, "rootwait");
-	/* This flag is skip_initramfs, Omit the last 2 characters to avoid getting patched by Magisk */
-	patch_flag_remove_flag(cmd, "skip_initram");
 }
 
 static int __init proc_cmdline_init(void)
@@ -88,7 +86,8 @@ static int __init proc_cmdline_init(void)
 	 */
 	patch_safetynet_flags(new_command_line);
 
-	patch_sar_flags(new_command_line);
+	if (is_super_part)
+		patch_sar_flags(new_command_line);
 
 	proc_create("cmdline", 0, NULL, &cmdline_proc_fops);
 	return 0;
