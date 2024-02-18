@@ -250,16 +250,16 @@ config OPPO_KEVENT_UPLOAD
 
 #ifdef CONFIG_VENDOR_EDIT
 config OPPO_ROOT_CHECK
-	def_bool y
+	bool
 
 config OPPO_EXECVE_BLOCK
-	def_bool y
+	bool
 
 config OPPO_EXECVE_REPORT
-	def_bool y
+	bool
 
 config OPPO_DISALLOW_KEY_INTERFACES
-	def_bool y
+	bool
 #endif/* CONFIG_VENDOR_EDIT */
 	
 config SMP
