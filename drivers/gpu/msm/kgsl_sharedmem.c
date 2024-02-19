@@ -302,6 +302,12 @@ void kgsl_process_init_sysfs(struct kgsl_device *device,
 	}
 }
 
+#ifdef CONFIG_VENDOR_EDIT
+unsigned long gpu_total(void)
+{
+	return (unsigned long)atomic_long_read(&kgsl_driver.stats.page_alloc);
+}
+#endif /*CONFIG_VENDOR_EDIT*/
 static ssize_t kgsl_drv_memstat_show(struct device *dev,
 				 struct device_attribute *attr,
 				 char *buf)
