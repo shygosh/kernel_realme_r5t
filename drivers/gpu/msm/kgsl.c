@@ -4588,6 +4588,15 @@ static unsigned long _search_range(struct kgsl_process_private *private,
 		if ((long) result == -EBUSY)
 			return -EBUSY;
 
+		/*
+		 * _gpu_set_svm_region will return -EBUSY if we tried to set up
+		 * SVM on an object that already has a GPU address. If
+		 * that happens don't bother walking the rest of the
+		 * region
+		 */
+		if ((long) result == -EBUSY)
+			return -EBUSY;
+
 		trace_kgsl_mem_unmapped_area_collision(entry, cpu, len);
 
 		if (cpu <= start) {

@@ -29,6 +29,9 @@
 #include "dsi_pwr.h"
 #include "dsi_parser.h"
 #include "msm_drv.h"
+#ifdef CONFIG_VENDOR_EDIT
+#include <linux/dsi_oppo_support.h>
+#endif /*CONFIG_VENDOR_EDIT*/
 
 #define MAX_BL_LEVEL 4096
 #define MAX_BL_SCALE_LEVEL 1024
@@ -115,9 +118,17 @@ struct dsi_backlight_config {
 	u32 bl_max_level;
 	u32 brightness_max_level;
 	u32 brightness_default_level;
+	#ifdef CONFIG_VENDOR_EDIT
+	u32 bl_normal_max_level;
+	u32 brightness_normal_max_level;
+#endif /* CONFIG_VENDOR_EDIT */
 	u32 bl_level;
 	u32 bl_scale;
 	u32 bl_scale_ad;
+//#ifdef CONFIG_ODM_WT_EDIT
+	int blmap_size;
+	int *blmap;
+//#endif /* CONFIG_ODM_WT_EDIT */
 
 	int en_gpio;
 	/* PWM params */
@@ -167,6 +178,15 @@ struct drm_panel_esd_config {
 	u32 groups;
 };
 
+#ifdef CONFIG_VENDOR_EDIT
+struct dsi_panel_oppo_privite {
+
+	bool skip_mipi_last_cmd;
+	bool is_aod_ramless;
+
+};
+#endif /* CONFIG_VENDOR_EDIT */
+
 struct dsi_panel {
 	const char *name;
 	const char *type;
@@ -202,11 +222,16 @@ struct dsi_panel {
 	struct dsi_parser_utils utils;
 
 	bool lp11_init;
+//#ifdef CONFIG_ODM_WT_EDIT
+	bool novatek_flag;
+//#endif /* CONFIG_ODM_WT_EDIT */
 	bool ulps_feature_enabled;
 	bool ulps_suspend_enabled;
 	bool allow_phy_power_off;
 	atomic_t esd_recovery_pending;
-
+//#ifdef CONFIG_ODM_WT_EDIT
+	atomic_t esd_recovery_flag;
+//#endif /* CONFIG_ODM_WT_EDIT */
 	bool panel_initialized;
 	bool te_using_watchdog_timer;
 	u32 qsync_min_fps;
@@ -217,6 +242,13 @@ struct dsi_panel {
 	bool sync_broadcast_en;
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;
+
+#ifdef CONFIG_VENDOR_EDIT
+	bool is_hbm_enabled;
+	/* Fix aod flash problem */
+	bool need_power_on_backlight;
+	struct dsi_panel_oppo_privite oppo_priv;
+#endif
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)
@@ -303,6 +335,15 @@ int dsi_panel_post_unprepare(struct dsi_panel *panel);
 
 int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl);
 
+//#ifdef CONFIG_ODM_WT_EDIT
+int dsi_panel_set_cabc_mode(struct dsi_panel *panel, u32 cabc_mode);
+int dsi_panel_get_cabc_mode(struct dsi_panel *panel, unsigned int *cabc_mode);
+int dsi_panel_cabc_off_enable(struct dsi_panel *panel);
+int dsi_panel_cabc_ui_mode_enable(struct dsi_panel *panel);
+int dsi_panel_cabc_still_mode_enable(struct dsi_panel *panel);
+int dsi_panel_cabc_moving_mode_enable(struct dsi_panel *panel);
+//#endif /* CONFIG_ODM_WT_EDIT */
+
 int dsi_panel_update_pps(struct dsi_panel *panel);
 
 int dsi_panel_send_qsync_on_dcs(struct dsi_panel *panel,
@@ -336,6 +377,10 @@ struct dsi_panel *dsi_panel_ext_bridge_get(struct device *parent,
 int dsi_panel_parse_esd_reg_read_configs(struct dsi_panel *panel);
 
 void dsi_panel_ext_bridge_put(struct dsi_panel *panel);
+#ifdef CONFIG_VENDOR_EDIT
+int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
+			   enum dsi_cmd_set_type type);
+#endif
 
 void dsi_panel_calc_dsi_transfer_time(struct dsi_host_common_cfg *config,
 		struct dsi_display_mode *mode, u32 frame_threshold_us);

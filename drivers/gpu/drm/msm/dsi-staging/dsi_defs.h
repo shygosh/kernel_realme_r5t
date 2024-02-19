@@ -282,6 +282,22 @@ enum dsi_dyn_clk_feature_type {
  * @DSI_CMD_SET_POST_TIMING_SWITCH:        Post timing switch
  * @DSI_CMD_SET_QSYNC_ON                   Enable qsync mode
  * @DSI_CMD_SET_QSYNC_OFF                  Disable qsync mode
+ #ifdef CONFIG_VENDOR_EDIT
+ * @DSI_CMD_POST_ON_BACKLIGHT:             Panel on cmd send for AOD and Fingerprint
+ * @DSI_CMD_AOD_ON:                        Panel AOD on cmd
+ * @DSI_CMD_AOD_OFF:                       Panel AOD off cmd
+ * @DSI_CMD_HBM_ON:                        Panel Fingerprint high brightness 670nit on cmd
+ * @DSI_CMD_HBM_OFF:                       Panel Fingerprint high brightness off cmd
+ * @DSI_CMD_AOD_HBM_ON:                    Panel AOD and Fingerprint high brightness  670nit on cmd
+ * @DSI_CMD_AOD_HBM_OFF:                   Panel AOD and Fingerprint high brightness off cmd
+ * @DSI_CMD_SEED_DCI_P3:                   Panel seed level 3 cmd
+ * @DSI_CMD_SEED_SRGB:                     Panel seed SRGB mode cmd
+ * @DSI_CMD_SEED_OFF:                      Panel seed off cmd
+ * @DSI_CMD_NORMAL_HBM_ON:                 Panel normal HBM 600nit on cmd
+ * @DSI_CMD_CABC_OFF:                      Shutdown IC CABC cmd
+ * @DSI_CMD_CABC_LOW_LEVEL:                Load 11.5% CABC cmd
+ * @DSI_CMD_CABC_HIGH_LEVEL,               Load 25% CABC cmd
+#endif
  * @DSI_CMD_SET_MAX
  */
 enum dsi_cmd_set_type {
@@ -308,6 +324,35 @@ enum dsi_cmd_set_type {
 	DSI_CMD_SET_POST_TIMING_SWITCH,
 	DSI_CMD_SET_QSYNC_ON,
 	DSI_CMD_SET_QSYNC_OFF,
+#ifdef CONFIG_VENDOR_EDIT
+	DSI_CMD_POST_ON_BACKLIGHT,
+	DSI_CMD_AOD_ON,
+	DSI_CMD_AOD_OFF,
+	DSI_CMD_HBM_ON,
+	DSI_CMD_HBM_OFF,
+	DSI_CMD_AOD_HBM_ON,
+	DSI_CMD_AOD_HBM_OFF,
+	DSI_CMD_SEED_MODE0,
+	DSI_CMD_SEED_MODE1,
+	DSI_CMD_SEED_MODE2,
+	DSI_CMD_SEED_MODE3,
+	DSI_CMD_SEED_MODE4,
+	DSI_CMD_SEED_OFF,
+	DSI_CMD_NORMAL_HBM_ON,
+	DSI_CMD_AOD_HIGH_LIGHT_MODE,
+	DSI_CMD_AOD_LOW_LIGHT_MODE,
+	DSI_CMD_CABC_OFF,
+	DSI_CMD_CABC_LOW_MODE,
+	DSI_CMD_CABC_HIGH_MODE,
+	DSI_CMD_FAILSAFE_ON,
+	DSI_CMD_FAILSAFE_OFF,
+#endif
+//#ifdef CONFIG_ODM_WT_EDIT
+	DSI_CMD_SET_CABC_OFF,
+	DSI_CMD_SET_CABC_UI_MODE,
+	DSI_CMD_SET_CABC_STILL_MODE,
+	DSI_CMD_SET_CABC_MOVING_MODE,
+//#endif /* CONFIG_ODM_WT_EDIT */
 	DSI_CMD_SET_MAX
 };
 
@@ -625,6 +670,10 @@ struct dsi_display_mode_priv_info {
 	struct msm_display_dsc_info dsc;
 	bool dsc_enabled;
 	struct msm_roi_caps roi_caps;
+	#ifdef CONFIG_VENDOR_EDIT
+	int fod_on_vblank;
+	int fod_off_vblank;
+	#endif /* CONFIG_VENDOR_EDIT */
 };
 
 /**

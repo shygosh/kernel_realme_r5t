@@ -2584,6 +2584,9 @@ static int _dsi_ctrl_setup_isr(struct dsi_ctrl *dsi_ctrl)
  */
 static void _dsi_ctrl_destroy_isr(struct dsi_ctrl *dsi_ctrl)
 {
+//#ifdef CONFIG_ODM_WT_EDIT
+uint32_t intr_idx = 0;
+//#endif /* CONFIG_ODM_WT_EDIT */
 	if (!dsi_ctrl || !dsi_ctrl->pdev || dsi_ctrl->irq_info.irq_num < 0)
 		return;
 
@@ -2591,7 +2594,18 @@ static void _dsi_ctrl_destroy_isr(struct dsi_ctrl *dsi_ctrl)
 		devm_free_irq(&dsi_ctrl->pdev->dev,
 				dsi_ctrl->irq_info.irq_num, dsi_ctrl);
 		dsi_ctrl->irq_info.irq_num = -1;
+//#ifdef CONFIG_ODM_WT_EDIT
+	for (intr_idx = 0; intr_idx < DSI_STATUS_INTERRUPT_COUNT; intr_idx++)
+	{
+		if (dsi_ctrl->irq_info.irq_stat_refcount[intr_idx] != 0)
+		{
+			pr_err("%s: intr_idx = %d, ref_count = %d\n", __func__, intr_idx, dsi_ctrl->irq_info.irq_stat_refcount[intr_idx]);
+			dsi_ctrl->irq_info.irq_stat_refcount[intr_idx] = 0;
+			dsi_ctrl->irq_info.irq_stat_mask = 0;
+		}
 	}
+//#endif /* CONFIG_ODM_WT_EDIT */
+		}
 }
 
 void dsi_ctrl_enable_status_interrupt(struct dsi_ctrl *dsi_ctrl,
@@ -2628,8 +2642,7 @@ void dsi_ctrl_disable_status_interrupt(struct dsi_ctrl *dsi_ctrl,
 {
 	unsigned long flags;
 
-	if (!dsi_ctrl || dsi_ctrl->irq_info.irq_num == -1 ||
-			intr_idx >= DSI_STATUS_INTERRUPT_COUNT)
+	if (!dsi_ctrl || intr_idx >= DSI_STATUS_INTERRUPT_COUNT)
 		return;
 
 	spin_lock_irqsave(&dsi_ctrl->irq_info.irq_lock, flags);
@@ -2641,7 +2654,8 @@ void dsi_ctrl_disable_status_interrupt(struct dsi_ctrl *dsi_ctrl,
 					dsi_ctrl->irq_info.irq_stat_mask);
 
 			/* don't need irq if no lines are enabled */
-			if (dsi_ctrl->irq_info.irq_stat_mask == 0)
+			if (dsi_ctrl->irq_info.irq_stat_mask == 0 &&
+				dsi_ctrl->irq_info.irq_num != -1)
 				disable_irq_nosync(dsi_ctrl->irq_info.irq_num);
 		}
 
