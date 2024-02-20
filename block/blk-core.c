@@ -2984,7 +2984,9 @@ bool blk_update_request(struct request *req, blk_status_t error,
 					latency_count = 0;
 				}
 				io_print_flag = true;
+				#ifdef CONFIG_EVENT_TRACING
 				blk_fill_rwbs(rwbs,req->cmd_flags, nr_bytes);
+				#endif
 		
 				/*if log is continuous, printk the first log.*/
 				if(!io_print_count)
