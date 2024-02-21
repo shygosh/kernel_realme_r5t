@@ -33,13 +33,13 @@
  * essence, they are percents: the higher the value, the more number
  * unsuccessful reclaims there were.
  */
-static const unsigned int vmpressure_level_med = 60;
-static const unsigned int vmpressure_level_critical = 95;
+static const unsigned int vmpressure_level_med = 66;
+static const unsigned int vmpressure_level_critical = 99;
 
 static unsigned long vmpressure_scale_max = 100;
 
 /* vmpressure values >= this will be scaled based on allocstalls */
-static unsigned long allocstall_threshold = 70;
+static unsigned long allocstall_threshold = 75;
 
 static struct vmpressure global_vmpressure;
 static BLOCKING_NOTIFIER_HEAD(vmpressure_notifier);
