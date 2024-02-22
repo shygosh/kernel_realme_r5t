@@ -104,7 +104,6 @@ obj-$(CONFIG_DEBUG_PAGE_REF) += debug_page_ref.o
 obj-$(CONFIG_HARDENED_USERCOPY) += usercopy.o
 obj-$(CONFIG_PERCPU_STATS) += percpu-stats.o
 obj-$(CONFIG_HMM) += hmm.o
-obj-$(CONFIG_PROCESS_RECLAIM)	+= process_reclaim.o
 #ifdef CONFIG_VENDOR_EDIT
 obj-$(CONFIG_OPPO_MEM_MONITOR) += memory_monitor.o
 #endif /*CONFIG_VENDOR_EDIT*/
