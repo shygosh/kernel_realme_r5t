@@ -3468,8 +3468,6 @@ int alloc_set_pte(struct vm_fault *vmf, struct mem_cgroup *memcg,
 	entry = mk_pte(page, vma->vm_page_prot);
 	if (write)
 		entry = maybe_mkwrite(pte_mkdirty(entry), vma);
-	if (vmf->flags & FAULT_FLAG_PREFAULT_OLD)
-		entry = pte_mkold(entry);
 
 	/* copy-on-write page */
 	if (write && !(vma->vm_flags & VM_SHARED)) {
