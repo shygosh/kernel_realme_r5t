@@ -1288,4 +1288,8 @@ config TOUCHSCREEN_SYNAPTICS_TCM
 
 source "drivers/input/touchscreen/synaptics_tcm/Kconfig"
 
+#ifdef CONFIG_ODM_WT_EDIT
+source "drivers/input/touchscreen/ili9881h/Kconfig"
+source "drivers/input/touchscreen/NT36525B/Kconfig"
+#endif
 endif
