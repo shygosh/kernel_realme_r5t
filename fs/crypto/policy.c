@@ -13,7 +13,6 @@
 #include <linux/string.h>
 #include <linux/mount.h>
 #include "fscrypt_private.h"
-#include "fscrypt_ice.h"
 
 /*
  * check whether an encryption policy is consistent with an encryption context
@@ -210,10 +209,7 @@ int fscrypt_has_permitted_context(struct inode *parent, struct inode *child)
 			(parent_ci->ci_data_mode == child_ci->ci_data_mode) &&
 			(parent_ci->ci_filename_mode ==
 			 child_ci->ci_filename_mode) &&
-			((parent_ci->ci_flags &
-			  ~FS_POLICY_FLAG_IV_INO_LBLK_32) ==
-			 (child_ci->ci_flags &
-			  ~FS_POLICY_FLAG_IV_INO_LBLK_32));
+			(parent_ci->ci_flags == child_ci->ci_flags);
 	}
 
 	res = cops->get_context(parent, &parent_ctx, sizeof(parent_ctx));
@@ -231,8 +227,7 @@ int fscrypt_has_permitted_context(struct inode *parent, struct inode *child)
 		 child_ctx.contents_encryption_mode) &&
 		(parent_ctx.filenames_encryption_mode ==
 		 child_ctx.filenames_encryption_mode) &&
-		((parent_ctx.flags & ~FS_POLICY_FLAG_IV_INO_LBLK_32) ==
-		 (child_ctx.flags & ~FS_POLICY_FLAG_IV_INO_LBLK_32));
+		(parent_ctx.flags == child_ctx.flags);
 }
 EXPORT_SYMBOL(fscrypt_has_permitted_context);
 
@@ -264,11 +259,6 @@ int fscrypt_inherit_context(struct inode *parent, struct inode *child,
 	ctx.contents_encryption_mode = ci->ci_data_mode;
 	ctx.filenames_encryption_mode = ci->ci_filename_mode;
 	ctx.flags = ci->ci_flags;
-
-	if (ctx.contents_encryption_mode == FS_ENCRYPTION_MODE_PRIVATE &&
-	    fscrypt_force_iv_ino_lblk_32())
-		ctx.flags |= FS_POLICY_FLAG_IV_INO_LBLK_32;
-
 	memcpy(ctx.master_key_descriptor, ci->ci_master_key_descriptor,
 	       FS_KEY_DESCRIPTOR_SIZE);
 	get_random_bytes(ctx.nonce, FS_KEY_DERIVATION_NONCE_SIZE);
