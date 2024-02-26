@@ -17,14 +17,21 @@
 #include <linux/vmpressure.h>
 #include <uapi/linux/sched/types.h>
 
-/* The minimum number of pages to free per reclaim */
-#define MIN_FREE_PAGES (CONFIG_ANDROID_SIMPLE_LMK_MINFREE * SZ_1M / PAGE_SIZE)
-
 /* Kill up to this many victims per reclaim */
 #define MAX_VICTIMS 1024
 
+#ifdef MODULE_PARAM_PREFIX
+#undef MODULE_PARAM_PREFIX
+#endif
+#define MODULE_PARAM_PREFIX "lowmemorykiller."
+
+/* The minimum number of pages to free per reclaim */
+static unsigned long slmk_reclaim_minfree = CONFIG_ANDROID_SIMPLE_LMK_MINFREE;
+module_param(slmk_reclaim_minfree, ulong, 0644);
+
 /* Timeout in jiffies for each reclaim */
-#define RECLAIM_EXPIRES msecs_to_jiffies(CONFIG_ANDROID_SIMPLE_LMK_TIMEOUT_MSEC)
+static unsigned int slmk_reclaim_timeout = CONFIG_ANDROID_SIMPLE_LMK_TIMEOUT_MSEC;
+module_param(slmk_reclaim_timeout, uint, 0644);
 
 struct victim_info {
 	struct task_struct *tsk;
@@ -43,6 +50,16 @@ static bool reclaim_active;
 static atomic_t needs_reclaim = ATOMIC_INIT(0);
 static atomic_t needs_reap = ATOMIC_INIT(0);
 static atomic_t nr_killed = ATOMIC_INIT(0);
+
+static unsigned long get_reclaim_minfree(void)
+{
+	return slmk_reclaim_minfree * SZ_1M / PAGE_SIZE;
+}
+
+static unsigned long get_reclaim_timeout(void)
+{
+	return msecs_to_jiffies(slmk_reclaim_timeout);
+}
 
 static int victim_cmp(const void *lhs_ptr, const void *rhs_ptr)
 {
@@ -153,7 +170,7 @@ static unsigned long find_victims(int *vindex)
 		     sizeof(*victims), victim_cmp, victim_swap);
 
 		/* Stop when we are out of space or have enough pages found */
-		if (*vindex == MAX_VICTIMS || pages_found >= MIN_FREE_PAGES) {
+		if (*vindex == MAX_VICTIMS || pages_found >= get_reclaim_minfree()) {
 			/* Zero out any remaining buckets we didn't touch */
 			if (i > min_adj)
 				memset(&task_bucket[min_adj], 0,
@@ -180,7 +197,7 @@ static int process_victims(int vlen)
 		struct task_struct *vtsk = victim->tsk;
 
 		/* The victim's mm lock is taken in find_victims; release it */
-		if (pages_found >= MIN_FREE_PAGES) {
+		if (pages_found >= get_reclaim_minfree()) {
 			task_unlock(vtsk);
 		} else {
 			pages_found += victim->size;
@@ -221,7 +238,7 @@ static void scan_and_kill(void)
 	}
 
 	/* Minimize the number of victims if we found more pages than needed */
-	if (pages_found > MIN_FREE_PAGES) {
+	if (pages_found > get_reclaim_minfree()) {
 		/* First round of processing to weed out unneeded victims */
 		nr_to_kill = process_victims(nr_found);
 
@@ -310,7 +327,7 @@ static void scan_and_kill(void)
 		wake_up(&reaper_waitq);
 
 	/* Wait until all the victims die or until the timeout is reached */
-	if (!wait_for_completion_timeout(&reclaim_done, RECLAIM_EXPIRES))
+	if (!wait_for_completion_timeout(&reclaim_done, get_reclaim_timeout()))
 		pr_info("Timeout hit waiting for victims to die, proceeding\n");
 
 	/* Clean up for future reclaims but let the reaper thread keep going */
@@ -507,6 +524,4 @@ static const struct kernel_param_ops simple_lmk_init_ops = {
 };
 
 /* Needed to prevent Android from thinking there's no LMK and thus rebooting */
-#undef MODULE_PARAM_PREFIX
-#define MODULE_PARAM_PREFIX "lowmemorykiller."
 module_param_cb(minfree, &simple_lmk_init_ops, NULL, 0200);
