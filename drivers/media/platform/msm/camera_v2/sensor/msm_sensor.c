@@ -315,8 +315,8 @@ static int msm_sensor_read_moduleinfo(struct msm_sensor_ctrl_t *s_ctrl, const ch
 	tmp_sid = sensor_i2c_client->cci_client->sid;
 
 	if (s_ctrl->id == 0) {
-        if (rear_module_flag & 0x01)
-            goto exit;
+		if (rear_module_flag & 0x01)
+			goto exit;
 	    sensor_i2c_client->cci_client->sid = 0xA0 >> 1;
 	    addr = 0x0;
 	    rc = sensor_i2c_client->i2c_func_tbl->i2c_read_seq(
@@ -334,8 +334,8 @@ static int msm_sensor_read_moduleinfo(struct msm_sensor_ctrl_t *s_ctrl, const ch
 	    rear_module_flag |= 0x01;
 	    msm_eeprom_proc_init(s_ctrl);
 	} else if (s_ctrl->id == 1) {
-        if (front_module_flag & 0x01)
-            goto exit;
+		if (front_module_flag & 0x01)
+			goto exit;
 	    addr = 0x0;
         if (strcmp(sensor_name,"s5k4h7_sunny") == 0){
             sensor_i2c_client->cci_client->sid = 0x20 >> 1;
@@ -476,8 +476,8 @@ static int msm_sensor_read_moduleinfo(struct msm_sensor_ctrl_t *s_ctrl, const ch
          msm_eeprom_proc_init(s_ctrl);
 
 	} else if (s_ctrl->id == 2) {
-        if (rear2_module_flag & 0x01)
-            goto exit;
+		if (rear2_module_flag & 0x01)
+			goto exit;
 	    addr = 0x0;
 	    sensor_i2c_client->cci_client->sid = 0xA2 >> 1;
 

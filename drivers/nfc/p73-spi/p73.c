@@ -396,8 +396,9 @@ static ssize_t p61_dev_write(struct file *filp, const char *buf, size_t count,
     p61_dev = filp->private_data;
 
     mutex_lock(&p61_dev->write_mutex);
-    if (count > p61_dev->kbuflen)
+    if (count > p61_dev->kbuflen) {
         count = p61_dev->kbuflen;
+    }
 
    // memset(&tx_buffer[0], 0, sizeof(tx_buffer));
     /*if (copy_from_user(&tx_buffer[0], &buf[0], count))
