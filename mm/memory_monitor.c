@@ -105,8 +105,8 @@ void memory_alloc_monitor(gfp_t gfp_mask, unsigned int order, u64 wait_ms)
 void oppo_ionwait_monitor(u64 wait_ms)
 {
     int fg = 0;
-    if (!ohm_ionmon_ctrl)
-    	return;
+	if (!ohm_ionmon_ctrl)
+		return;
 
 	fg = current_is_fg();
 	if (fg) {
