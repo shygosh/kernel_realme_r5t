@@ -423,6 +423,8 @@ source "drivers/net/dsa/Kconfig"
 
 source "drivers/net/ethernet/Kconfig"
 
+source "drivers/net/wireguard/Kconfig"
+
 source "drivers/net/fddi/Kconfig"
 
 source "drivers/net/hippi/Kconfig"
