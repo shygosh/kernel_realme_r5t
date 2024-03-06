@@ -24,7 +24,6 @@
 #include <linux/printk.h>
 #include <linux/notifier.h>
 #include <linux/init.h>
-#include <linux/module.h>
 #include <linux/vmpressure.h>
 
 /*
@@ -35,11 +34,6 @@
  */
 static const unsigned int vmpressure_level_med = 66;
 static const unsigned int vmpressure_level_critical = 99;
-
-static unsigned long vmpressure_scale_max = 100;
-
-/* vmpressure values >= this will be scaled based on allocstalls */
-static unsigned long allocstall_threshold = 75;
 
 static struct vmpressure global_vmpressure;
 static BLOCKING_NOTIFIER_HEAD(vmpressure_notifier);
@@ -166,19 +160,6 @@ out:
 		 scanned, reclaimed);
 
 	return pressure;
-}
-
-static unsigned long vmpressure_account_stall(unsigned long pressure,
-				unsigned long stall, unsigned long scanned)
-{
-	unsigned long scale;
-
-	if (pressure < allocstall_threshold)
-		return pressure;
-
-	scale = ((vmpressure_scale_max - pressure) * stall) / scanned;
-
-	return pressure + scale;
 }
 
 struct vmpressure_event {
@@ -358,7 +339,6 @@ bool vmpressure_inc_users(int order)
 		spin_lock(&vmpr->sr_lock);
 		vmpr->scanned = 0;
 		vmpr->reclaimed = 0;
-		vmpr->stall = 0;
 		spin_unlock(&vmpr->sr_lock);
 	}
 	write_unlock_irqrestore(&vmpr->users_lock, flags);
@@ -380,7 +360,6 @@ static void vmpressure_global(gfp_t gfp, unsigned long scanned, bool critical,
 {
 	struct vmpressure *vmpr = &global_vmpressure;
 	unsigned long pressure;
-	unsigned long stall;
 	unsigned long flags;
 
 	if (critical)
@@ -390,11 +369,6 @@ static void vmpressure_global(gfp_t gfp, unsigned long scanned, bool critical,
 	if (scanned) {
 		vmpr->scanned += scanned;
 		vmpr->reclaimed += reclaimed;
-
-		if (!current_is_kswapd())
-			vmpr->stall += scanned;
-
-		stall = vmpr->stall;
 		scanned = vmpr->scanned;
 		reclaimed = vmpr->reclaimed;
 
@@ -405,12 +379,10 @@ static void vmpressure_global(gfp_t gfp, unsigned long scanned, bool critical,
 	}
 	vmpr->scanned = 0;
 	vmpr->reclaimed = 0;
-	vmpr->stall = 0;
 	spin_unlock_irqrestore(&vmpr->sr_lock, flags);
 
 	if (scanned) {
 		pressure = vmpressure_calc_pressure(scanned, reclaimed);
-		pressure = vmpressure_account_stall(pressure, stall, scanned);
 	} else {
 		pressure = 100;
 	}
