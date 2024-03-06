@@ -2370,6 +2370,10 @@ EXPORT_SYMBOL(__cpu_active_mask);
 struct cpumask __cpu_isolated_mask __read_mostly;
 EXPORT_SYMBOL(__cpu_isolated_mask);
 
+static const unsigned long boot_cpu_bits = 1;
+const struct cpumask *const cpu_boot_mask = to_cpumask(&boot_cpu_bits);
+EXPORT_SYMBOL(cpu_boot_mask);
+
 #if CONFIG_LITTLE_CPU_MASK
 static const unsigned long lp_cpu_bits = CONFIG_LITTLE_CPU_MASK;
 const struct cpumask *const cpu_lp_mask = to_cpumask(&lp_cpu_bits);
