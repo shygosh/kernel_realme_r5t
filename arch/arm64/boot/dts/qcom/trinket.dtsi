@@ -408,7 +408,6 @@
 	};
 
 	chosen {
-		bootargs = "rcupdate.rcu_expedited=1 noirqdebug quiet kpti=off zswap.max_pool_percent=25";
 	};
 
 	soc: soc { };
