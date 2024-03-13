@@ -916,21 +916,12 @@ static void __init do_initcall_level(int level)
 		do_one_initcall(*fn);
 }
 
-#ifdef CONFIG_VENDOR_EDIT
-extern int __init hypnus_init(void);
-#endif /* CONFIG_VENDOR_EDIT */
 static void __init do_initcalls(void)
 {
 	int level;
 
 	for (level = 0; level < ARRAY_SIZE(initcall_levels) - 1; level++)
 		do_initcall_level(level);
-
-#ifdef CONFIG_VENDOR_EDIT
-#ifdef CONFIG_OPPO_HYPNUS
-	hypnus_init();
-#endif
-#endif /* CONFIG_VENDOR_EDIT */
 }
 
 /*

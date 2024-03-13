@@ -24,9 +24,6 @@ void core_ctl_check(u64 wallclock);
 int core_ctl_set_boost(bool boost);
 void core_ctl_notifier_register(struct notifier_block *n);
 void core_ctl_notifier_unregister(struct notifier_block *n);
-#ifdef CONFIG_VENDOR_EDIT
-int hypnus_set_min_max_cpus(unsigned int index, unsigned int min, unsigned int max);
-#endif /* CONFIG_VENDOR_EDIT */
 #else
 static inline void core_ctl_check(u64 wallclock) {}
 static inline int core_ctl_set_boost(bool boost)
@@ -35,8 +32,5 @@ static inline int core_ctl_set_boost(bool boost)
 }
 static inline void core_ctl_notifier_register(struct notifier_block *n) {}
 static inline void core_ctl_notifier_unregister(struct notifier_block *n) {}
-#ifdef CONFIG_VENDOR_EDIT
-static inline int hypnus_set_min_max_cpus(unsigned int index, unsigned int min, unsigned int max) {}
-#endif /* CONFIG_VENDOR_EDIT */
 #endif
 #endif

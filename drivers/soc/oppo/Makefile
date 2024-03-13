@@ -3,7 +3,6 @@ obj-y	+=  oppo_devinfo/
 obj-y   +=  oppo_als_cali_value/
 obj-y	+=  oppo_sensorinfo/
 obj-y	+=  oppo_gpio/
-obj-$(CONFIG_OPPO_HYPNUS)     +=  oppo_hypnus/
 
 #ifdef CONFIG_VENDOR_EDIT
 obj-$(CONFIG_OPPO_SHUTDOWN_DETECT)	+=  oppo_shutdown_detect/

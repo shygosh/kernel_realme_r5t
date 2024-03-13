@@ -223,10 +223,6 @@ extern void devm_devfreq_unregister_notifier(struct device *dev,
 				unsigned int list);
 extern struct devfreq *devfreq_get_devfreq_by_phandle(struct device *dev,
 						int index);
-#ifdef CONFIG_VENDOR_EDIT
-extern int devfreq_set_limit(struct devfreq *df, unsigned long min, unsigned long max);
-extern int devfreq_get_limit(struct devfreq *df, unsigned long *min, unsigned long *max);
-#endif
 
 #if IS_ENABLED(CONFIG_DEVFREQ_GOV_SIMPLE_ONDEMAND)
 /**
@@ -390,18 +386,6 @@ static inline int devfreq_update_stats(struct devfreq *df)
 {
 	return -EINVAL;
 }
-
-#ifdef CONFIG_VENDOR_EDIT
-static inline int devfreq_set_limit(struct devfreq *df, unsigned long min, unsigned long max)
-{
-        return -EINVAL;
-}
-
-static inline int devfreq_get_limit(struct devfreq *df, unsigned long *min, unsigned long *max)
-{
-        return -EINVAL;
-}
-#endif /* CONFIG_VENDOR_EDIT */
 #endif /* CONFIG_PM_DEVFREQ */
 
 #endif /* __LINUX_DEVFREQ_H__ */
