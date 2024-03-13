@@ -955,11 +955,6 @@ struct rq {
 	struct cpuidle_state *idle_state;
 	int idle_state_idx;
 #endif
-#ifdef CONFIG_VENDOR_EDIT
-    struct list_head ux_thread_list;
-    int active_ux_balance;
-    struct cpu_stop_work ux_balance_work;
-#endif /* CONFIG_VENDOR_EDIT */
 
 };
 

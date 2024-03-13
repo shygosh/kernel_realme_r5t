@@ -44,10 +44,6 @@
 #include <soc/oppo/oppo_healthinfo.h>
 #endif /*CONFIG_VENDOR_EDIT*/
 
-#ifdef CONFIG_VENDOR_EDIT
-#include <linux/oppocfs/oppo_cfs_common.h>
-#endif
-
 #ifdef CONFIG_SMP
 static inline bool task_fits_max(struct task_struct *p, int cpu);
 #endif /* CONFIG_SMP */
@@ -5415,11 +5411,6 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 		flags = ENQUEUE_WAKEUP;
 	}
-#ifdef CONFIG_VENDOR_EDIT
-	if (sysctl_uifirst_enabled) {
-		enqueue_ux_thread(rq, p);
-	}
-#endif
 
 	for_each_sched_entity(se) {
 		cfs_rq = cfs_rq_of(se);
@@ -5496,11 +5487,6 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 		}
 		flags |= DEQUEUE_SLEEP;
 	}
-#ifdef CONFIG_VENDOR_EDIT
-	if (sysctl_uifirst_enabled) {
-		dequeue_ux_thread(rq, p);
-	}
-#endif
 
 	for_each_sched_entity(se) {
 		cfs_rq = cfs_rq_of(se);
@@ -8754,11 +8740,6 @@ static void check_preempt_wakeup(struct rq *rq, struct task_struct *p, int wake_
 	find_matching_se(&se, &pse);
 	update_curr(cfs_rq_of(se));
 	BUG_ON(!pse);
-#ifdef CONFIG_VENDOR_EDIT
-	if (sysctl_uifirst_enabled && (p->static_ux || atomic64_read(&p->dynamic_ux))) {
-		goto preempt;
-	}
-#endif
 
 	if (wakeup_preempt_entity(se, pse) == 1) {
 		/*
@@ -8850,11 +8831,6 @@ again:
 	} while (cfs_rq);
 
 	p = task_of(se);
-#ifdef CONFIG_VENDOR_EDIT
-	if (sysctl_uifirst_enabled) {
-		pick_ux_thread(rq, &p, &se);
-	}
-#endif
 
 	/*
 	 * Since we haven't yet done put_prev_entity and if the selected task

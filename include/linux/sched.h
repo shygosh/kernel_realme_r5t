@@ -199,24 +199,6 @@ struct task_group;
 
 #endif
 
-#ifdef CONFIG_VENDOR_EDIT
-enum DYNAMIC_UX_TYPE
-{
-    DYNAMIC_UX_BINDER = 0,
-    DYNAMIC_UX_RWSEM,
-    DYNAMIC_UX_MUTEX,
-    DYNAMIC_UX_SEM,
-    DYNAMIC_UX_FUTEX,
-    DYNAMIC_UX_MAX,
-};
-
-#define UX_MSG_LEN 64
-#define UX_DEPTH_MAX 2
-
-extern int sysctl_uifirst_enabled;
-extern int sysctl_launcher_boost_enabled;
-#endif /* CONFIG_VENDOR_EDIT */
-
 #if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
 struct uifirst_d_state {
     u64 iowait_ns;

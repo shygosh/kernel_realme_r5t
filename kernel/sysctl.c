@@ -143,10 +143,6 @@ static int two_million = 2000000;
 unsigned int sysctl_fg_io_opt = 1;
 #endif /*CONFIG_VENDOR_EDIT*/
 
-//#ifdef COLOROS_EDIT
-int sysctl_ed_task_enabled = 1;
-//#endif /*COLOROS_EDIT*/
-
 #ifdef CONFIG_VENDOR_EDIT
 unsigned int sysctl_ext4_fsync_enable = 1;
 unsigned int ext4_fsync_enable_status = 0;
@@ -327,11 +323,6 @@ static int max_sched_tunable_scaling = SCHED_TUNABLESCALING_END-1;
 #endif /* CONFIG_SMP */
 #endif /* CONFIG_SCHED_DEBUG */
 
-#ifdef CONFIG_VENDOR_EDIT
-int sysctl_uifirst_enabled = 1;
-int sysctl_launcher_boost_enabled = 0;
-#endif /* CONFIG_VENDOR_EDIT */
-
 #ifdef CONFIG_COMPACTION
 static int min_extfrag_threshold;
 static int max_extfrag_threshold = 1000;
@@ -466,15 +457,6 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec,
 },
 #endif
-//#ifdef COLOROS_EDIT
-{
-        .procname   = "ed_task_enabled",
-        .data       = &sysctl_ed_task_enabled,
-        .maxlen     = sizeof(int),
-        .mode       = 0666,
-        .proc_handler = proc_dointvec,
-},
-//#endif
 #ifdef CONFIG_VENDOR_EDIT
 {
 		.procname	= "ext4_fsync_enable",
@@ -1460,22 +1442,6 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec,
 	},
 #endif
-#ifdef CONFIG_VENDOR_EDIT
-	{
-		.procname	= "uifirst_enabled",
-		.data		= &sysctl_uifirst_enabled,
-		.maxlen 	= sizeof(int),
-		.mode		= 0666,
-		.proc_handler = proc_dointvec,
-	},
-	{
-		.procname	= "launcher_boost_enabled",
-		.data		= &sysctl_launcher_boost_enabled,
-		.maxlen 	= sizeof(int),
-		.mode		= 0666,
-		.proc_handler = proc_dointvec,
-	},
-#endif /* CONFIG_VENDOR_EDIT */
 	{ }
 };
 

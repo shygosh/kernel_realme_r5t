@@ -104,10 +104,6 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/task.h>
 
-#ifdef CONFIG_VENDOR_EDIT
-#include <linux/oppocfs/oppo_cfs_fork.h>
-#endif
-
 /*
  * Minimum number of threads to boot the kernel
  */
@@ -1750,10 +1746,6 @@ static __latent_entropy struct task_struct *copy_process(
 #ifdef CONFIG_BCACHE
 	p->sequential_io	= 0;
 	p->sequential_io_avg	= 0;
-#endif
-
-#ifdef CONFIG_VENDOR_EDIT
-	init_task_ux_info(p);
 #endif
 
 #if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)

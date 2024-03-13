@@ -45,9 +45,6 @@ __mutex_init(struct mutex *lock, const char *name, struct lock_class_key *key)
 #ifdef CONFIG_MUTEX_SPIN_ON_OWNER
 	osq_lock_init(&lock->osq);
 #endif
-#ifdef CONFIG_VENDOR_EDIT
-	lock->ux_dep_task = NULL;
-#endif
 
 	debug_mutex_init(lock, name, key);
 }
@@ -798,15 +795,7 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
 
 	if (!use_ww_ctx) {
 		/* add waiting tasks to the end of the waitqueue (FIFO): */
-#ifdef CONFIG_VENDOR_EDIT
-		if (sysctl_uifirst_enabled) {
-			mutex_list_add(current, &waiter.list, &lock->wait_list, lock);
-		} else {
-			list_add_tail(&waiter.list, &lock->wait_list);
-		}
-#else
 		list_add_tail(&waiter.list, &lock->wait_list);
-#endif
 
 
 #ifdef CONFIG_DEBUG_MUTEXES
@@ -854,11 +843,6 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
 			if (ret)
 				goto err;
 		}
-#ifdef CONFIG_VENDOR_EDIT
-		if (sysctl_uifirst_enabled) {
-			mutex_dynamic_ux_enqueue(lock, current);
-		}
-#endif
 
 		spin_unlock(&lock->wait_lock);
 #if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
@@ -1090,12 +1074,6 @@ static noinline void __sched __mutex_unlock_slowpath(struct mutex *lock, unsigne
 
 	spin_lock(&lock->wait_lock);
 	debug_mutex_unlock(lock);
-#ifdef CONFIG_VENDOR_EDIT
-	if (sysctl_uifirst_enabled) {
-		mutex_dynamic_ux_dequeue(lock, current);
-	}
-#endif
-
 	if (!list_empty(&lock->wait_list)) {
 		/* get the first entry from the wait-list: */
 		struct mutex_waiter *waiter =

@@ -45,9 +45,6 @@ obj-y += irq/
 obj-y += rcu/
 obj-y += livepatch/
 
-#ifdef CONFIG_VENDOR_EDIT
-obj-y += oppocfs/
-
 obj-$(CONFIG_OPPO_KEVENT_UPLOAD) += oppo_kevent_upload.o
 obj-$(CONFIG_CHECKPOINT_RESTORE) += kcmp.o
 obj-$(CONFIG_FREEZER) += freezer.o
