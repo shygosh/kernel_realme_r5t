@@ -105,7 +105,7 @@ root_schedtune = {
  *    implementation especially for the computation of the per-CPU boost
  *    value
  */
-#define BOOSTGROUPS_COUNT 6
+#define BOOSTGROUPS_COUNT 8
 
 /* Array of configured boostgroups */
 static struct schedtune *allocated_group[BOOSTGROUPS_COUNT] = {
@@ -718,11 +718,15 @@ struct st_data {
 static void write_default_values(struct cgroup_subsys_state *css)
 {
 	static struct st_data st_targets[] = {
-		{ "audio-app",	0, 0, 0, 0 },
-		{ "background",	0, 0, 0, 0 },
-		{ "foreground",	0, 1, 0, 1 },
-		{ "rt",		0, 0, 0, 0 },
-		{ "top-app",	1, 1, 0, 1 },
+		{ "audio-app",		0, 0, 0, 0 },
+		{ "background",		0, 0, 0, 0 },
+		{ "foreground",		1, 1, 0, 1 },
+		{ "top-app",		1, 1, 0, 1 },
+		{ "rt", 		0, 0, 0, 0 },
+		{ "fb0",		1, 1, 0, 1 },
+		{ "fb1",		1, 1, 0, 1 },
+		{ "camera-daemon",	1, 1, 0, 1 },
+		{ "nnapi-hal",		1, 1, 0, 1 },
 	};
 	int i;
 
