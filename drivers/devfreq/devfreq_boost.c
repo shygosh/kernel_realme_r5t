@@ -10,6 +10,7 @@
 #include <linux/kthread.h>
 #include <linux/msm_drm_notify.h>
 #include <linux/slab.h>
+#include <linux/cib_touch_boost.h>
 #include <uapi/linux/sched/types.h>
 
 enum {
@@ -58,16 +59,19 @@ static void __devfreq_boost_kick(struct boost_dev *b)
 	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state))
 		return;
 
+	if (!touch_boost_duration)
+		return;
+
 	set_bit(INPUT_BOOST, &b->state);
 	if (!mod_delayed_work(system_unbound_wq, &b->input_unboost,
-		msecs_to_jiffies(CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS))) {
+		msecs_to_jiffies(touch_boost_duration))) {
 		/* Set the bit again in case we raced with the unboost worker */
 		set_bit(INPUT_BOOST, &b->state);
 		wake_up(&b->boost_waitq);
 	}
 }
 
-void devfreq_boost_kick(enum df_device device)
+static void devfreq_boost_kick(enum df_device device)
 {
 	struct df_boost_drv *d = &df_boost_drv_g;
 
@@ -102,7 +106,7 @@ static void __devfreq_boost_kick_max(struct boost_dev *b,
 	}
 }
 
-void devfreq_boost_kick_max(enum df_device device, unsigned int duration_ms)
+static void devfreq_boost_kick_max(enum df_device device, unsigned int duration_ms)
 {
 	struct df_boost_drv *d = &df_boost_drv_g;
 
@@ -271,19 +275,6 @@ static const struct input_device_id devfreq_boost_ids[] = {
 		.absbit = { [BIT_WORD(ABS_MT_POSITION_X)] =
 			BIT_MASK(ABS_MT_POSITION_X) |
 			BIT_MASK(ABS_MT_POSITION_Y) }
-	},
-	/* Touchpad */
-	{
-		.flags = INPUT_DEVICE_ID_MATCH_KEYBIT |
-			INPUT_DEVICE_ID_MATCH_ABSBIT,
-		.keybit = { [BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH) },
-		.absbit = { [BIT_WORD(ABS_X)] =
-			BIT_MASK(ABS_X) | BIT_MASK(ABS_Y) }
-	},
-	/* Keypad */
-	{
-		.flags = INPUT_DEVICE_ID_MATCH_EVBIT,
-		.evbit = { BIT_MASK(EV_KEY) }
 	},
 	{ }
 };

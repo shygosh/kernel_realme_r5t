@@ -12,7 +12,12 @@
 #include <linux/kthread.h>
 #include <linux/version.h>
 #include <linux/slab.h>
+#include <linux/moduleparam.h>
+#include <linux/cib_touch_boost.h>
 #include <uapi/linux/sched/types.h>
+
+unsigned short touch_boost_duration __read_mostly = 0;
+module_param(touch_boost_duration, ushort, 0644);
 
 enum {
 	SCREEN_OFF,
@@ -83,13 +88,16 @@ static void __cpu_input_boost_kick(struct boost_drv *b)
 	if (test_bit(SCREEN_OFF, &b->state))
 		return;
 
+	if (!touch_boost_duration)
+		return;
+
 	set_bit(INPUT_BOOST, &b->state);
 	if (!mod_delayed_work(system_unbound_wq, &b->input_unboost,
-			      msecs_to_jiffies(CONFIG_INPUT_BOOST_DURATION_MS)))
+			      msecs_to_jiffies(touch_boost_duration)))
 		wake_up(&b->boost_waitq);
 }
 
-void cpu_input_boost_kick(void)
+static void cpu_input_boost_kick(void)
 {
 	struct boost_drv *b = &boost_drv_g;
 
@@ -121,7 +129,7 @@ static void __cpu_input_boost_kick_max(struct boost_drv *b,
 		wake_up(&b->boost_waitq);
 }
 
-void cpu_input_boost_kick_max(unsigned int duration_ms)
+static void cpu_input_boost_kick_max(unsigned int duration_ms)
 {
 	struct boost_drv *b = &boost_drv_g;
 
@@ -289,19 +297,6 @@ static const struct input_device_id cpu_input_boost_ids[] = {
 		.absbit = { [BIT_WORD(ABS_MT_POSITION_X)] =
 			BIT_MASK(ABS_MT_POSITION_X) |
 			BIT_MASK(ABS_MT_POSITION_Y) }
-	},
-	/* Touchpad */
-	{
-		.flags = INPUT_DEVICE_ID_MATCH_KEYBIT |
-			INPUT_DEVICE_ID_MATCH_ABSBIT,
-		.keybit = { [BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH) },
-		.absbit = { [BIT_WORD(ABS_X)] =
-			BIT_MASK(ABS_X) | BIT_MASK(ABS_Y) }
-	},
-	/* Keypad */
-	{
-		.flags = INPUT_DEVICE_ID_MATCH_EVBIT,
-		.evbit = { BIT_MASK(EV_KEY) }
 	},
 	{ }
 };
