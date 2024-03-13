@@ -374,7 +374,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = proc_dointvec,
 	},
 	{
-		.procname	= "sched_group_upmigrate",
+		.procname	= "sched_group_upmigrate_alt",
 		.data		= &sysctl_sched_group_upmigrate_pct,
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
@@ -382,7 +382,7 @@ static struct ctl_table kern_table[] = {
 		.extra1		= &sysctl_sched_group_downmigrate_pct,
 	},
 	{
-		.procname	= "sched_group_downmigrate",
+		.procname	= "sched_group_downmigrate_alt",
 		.data		= &sysctl_sched_group_downmigrate_pct,
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
@@ -446,14 +446,14 @@ static struct ctl_table kern_table[] = {
 	},
 #endif
 	{
-		.procname	= "sched_upmigrate",
+		.procname	= "sched_upmigrate_alt",
 		.data		= &sysctl_sched_capacity_margin_up,
 		.maxlen		= sizeof(unsigned int) * MAX_MARGIN_LEVELS,
 		.mode		= 0644,
 		.proc_handler	= sched_updown_migrate_handler,
 	},
 	{
-		.procname	= "sched_downmigrate",
+		.procname	= "sched_downmigrate_alt",
 		.data		= &sysctl_sched_capacity_margin_down,
 		.maxlen		= sizeof(unsigned int) * MAX_MARGIN_LEVELS,
 		.mode		= 0644,
