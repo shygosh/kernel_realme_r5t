@@ -7412,7 +7412,7 @@ static inline int select_idle_sibling_cstate_aware(struct task_struct *p, int pr
 				unsigned long new_usage;
 				unsigned long capacity_orig;
 
-				if (!idle_cpu(i))
+				if (!idle_cpu(i) && !sched_idle_cpu(i))
 					goto next;
 
 				if (cpu_isolated(i))
@@ -7634,7 +7634,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 	/* fast path for prev_cpu */
 	if ((capacity_orig_of(prev_cpu) == capacity_orig_of(cpu)) &&
 		!cpu_isolated(prev_cpu) && cpu_online(prev_cpu) &&
-		idle_cpu(prev_cpu)) {
+		(idle_cpu(prev_cpu) || sched_idle_cpu(prev_cpu))) {
 
 		if (idle_get_state_idx(cpu_rq(prev_cpu)) <= 1) {
 			/*
@@ -7723,7 +7723,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 			 */
 			spare_cap = capacity_orig - new_util;
 
-			if (idle_cpu(i))
+			if (idle_cpu(i) || sched_idle_cpu(i))
 				idle_idx = idle_get_state_idx(cpu_rq(i));
 
 
@@ -7765,7 +7765,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 				 * - for !boosted tasks: the most energy
 				 * efficient CPU (i.e. smallest capacity_orig)
 				 */
-				if (idle_cpu(i)) {
+				if (idle_cpu(i) || sched_idle_cpu(i)) {
 					if (boosted &&
 					    capacity_orig < target_capacity)
 						continue;
@@ -7859,7 +7859,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 			 * will take care to ensure the minimization of energy
 			 * consumptions without affecting performance.
 			 */
-			if (idle_cpu(i)) {
+			if (idle_cpu(i) || sched_idle_cpu(i)) {
 				/*
 				 * Skip CPUs in deeper idle state, but only
 				 * if they are also less energy efficient.
@@ -8366,7 +8366,7 @@ static int find_energy_efficient_cpu(struct sched_domain *sd,
 			goto out;
 
 		/* Immediately return a found idle CPU for a prefer_idle task */
-		if (prefer_idle && idle_cpu(target_cpu))
+		if (prefer_idle && (idle_cpu(target_cpu) || sched_idle_cpu(target_cpu)))
 			goto out;
 
 #ifdef CONFIG_SCHED_WALT
