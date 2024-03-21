@@ -409,7 +409,7 @@ static struct ctl_table kern_table[] = {
 		.extra2		= &one_thousand,
 	},
 	{
-		.procname	= "sched_walt_rotate_big_tasks",
+		.procname	= "sched_walt_rotate_big_tasks_alt",
 		.data		= &sysctl_sched_walt_rotate_big_tasks,
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
