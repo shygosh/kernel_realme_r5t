@@ -1219,17 +1219,6 @@ static struct ctl_table ipv4_net_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-	#ifdef CONFIG_VENDOR_EDIT
-	//add for [BUGID],disable tcp random timestamp,some networks limit tcp syn before login
-	{
-		.procname	= "tcp_random_timestamp",
-		.data		= &init_net.ipv4.sysctl_tcp_random_timestamp,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= proc_dointvec
-	},
-	#endif /* CONFIG_VENDOR_EDIT */
-
 	{ }
 };
 

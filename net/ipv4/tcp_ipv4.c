@@ -2502,10 +2502,6 @@ static int __net_init tcp_sk_init(struct net *net)
 	net->ipv4.sysctl_tcp_window_scaling = 1;
 	net->ipv4.sysctl_tcp_timestamps = 1;
 
-	#ifdef CONFIG_VENDOR_EDIT
-	//add for [BUGID],disable tcp random timestamp,some networks limit tcp syn before login
-	net->ipv4.sysctl_tcp_random_timestamp = 1;
-	#endif /* CONFIG_VENDOR_EDIT */
 	return 0;
 fail:
 	tcp_sk_exit(net);
