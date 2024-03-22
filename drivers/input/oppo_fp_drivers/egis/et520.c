@@ -839,7 +839,7 @@ static int etspi_parse_dt(struct device *device,
 		goto dt_exit;
 	} else {
 		data->vcc_Pin = gpio;
-		pr_info("%s: power pin=%d\n", __func__, data->vcc_Pin);
+		pr_debug("%s: power pin=%d\n", __func__, data->vcc_Pin);
 	}
 #endif
 #ifdef egis_1v8
@@ -849,7 +849,7 @@ static int etspi_parse_dt(struct device *device,
 		goto dt_exit;
 	} else {
 		data->vdd_18v_Pin = gpio;
-		pr_info("%s: 18v power pin=%d\n", __func__, data->vdd_18v_Pin);
+		pr_debug("%s: 18v power pin=%d\n", __func__, data->vdd_18v_Pin);
 	}
 #endif
 	DEBUG_PRINT("%s is successful\n", __func__);

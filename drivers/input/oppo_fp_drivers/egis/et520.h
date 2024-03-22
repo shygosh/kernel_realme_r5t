@@ -27,14 +27,7 @@
 
 #include <linux/regulator/consumer.h>
 
-/*#define FP_SPI_DEBUG*/
-#define FP_SPI_DEBUG
-
-#ifdef FP_SPI_DEBUG
-#define DEBUG_PRINT(fmt, args...) pr_err(fmt, ## args)
-#else
-#define DEBUG_PRINT(fmt, args...)
-#endif
+#define DEBUG_PRINT(fmt, args...) do { } while(0)
 
 #define ET523_MAJOR					100 /* assigned */
 #define N_SPI_MINORS				32  /* ... up to 256 */
