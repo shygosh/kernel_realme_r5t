@@ -505,7 +505,7 @@ static int dsi_panel_power_on(struct dsi_panel *panel)
 {
 	int rc = 0;
 //#ifdef CONFIG_ODM_WT_EDIT
-	pr_info("LCD_LOG : %s , begin\n", __func__);
+	pr_debug("LCD_LOG : %s , begin\n", __func__);
 //#endif /* CONFIG_ODM_WT_EDIT */
 	rc = dsi_pwr_enable_regulator(&panel->power_info, true);
 	if (rc) {
@@ -564,7 +564,7 @@ error_disable_vregs:
 
 exit:
 //#ifdef CONFIG_ODM_WT_EDIT
-	pr_info("LCD_LOG : %s , end\n", __func__);
+	pr_debug("LCD_LOG : %s , end\n", __func__);
 //#endif /* CONFIG_ODM_WT_EDIT */
 	return rc;
 }
@@ -573,7 +573,7 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 {
 	int rc = 0;
 //#ifdef CONFIG_ODM_WT_EDIT
-	pr_info("LCD_LOG : %s , begin\n", __func__);
+	pr_debug("LCD_LOG : %s , begin\n", __func__);
 //#endif /* CONFIG_ODM_WT_EDIT */
 /*
 	if (gpio_is_valid(panel->reset_config.disp_en_gpio))
@@ -595,7 +595,7 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 	if (rc)
 		pr_err("[%s] failed to enable vregs, rc=%d\n", panel->name, rc);
 //#ifdef CONFIG_ODM_WT_EDIT
-	pr_info("LCD_LOG : %s , end\n", __func__);
+	pr_debug("LCD_LOG : %s , end\n", __func__);
 //#endif /* CONFIG_ODM_WT_EDIT */
 
 	#ifdef CONFIG_VENDOR_EDIT
@@ -725,7 +725,7 @@ int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 	state = mode->priv_info->cmd_sets[type].state;
 
 #ifdef CONFIG_VENDOR_EDIT
-	pr_err("dsi_cmd %s\n", cmd_set_prop_map[type]);
+	pr_debug("dsi_cmd %s\n", cmd_set_prop_map[type]);
 	if (oppo_seed_backlight) {
 		oppo_cmd_set = oppo_dsi_update_seed_backlight(panel, oppo_seed_backlight, type);
 		if (!IS_ERR_OR_NULL(oppo_cmd_set)) {
@@ -856,7 +856,7 @@ static int dsi_panel_update_backlight(struct dsi_panel *panel,
 		return -EINVAL;
 	}
 
-	pr_err("dsi_panel_update_backlight---lvl:%d\n", bl_lvl);
+	pr_debug("dsi_panel_update_backlight---lvl:%d\n", bl_lvl);
 	dsi = &panel->mipi_device;
 
 	//#ifdef CONFIG_ODM_WT_EDIT
@@ -4664,7 +4664,7 @@ int dsi_panel_prepare(struct dsi_panel *panel)
 
 //#ifdef CONFIG_ODM_WT_EDIT
 	if (panel->novatek_flag) {
-		pr_info("LCD_LOG [%s] reset panel novatek\n", __func__);
+		pr_debug("LCD_LOG [%s] reset panel novatek\n", __func__);
 		rc = dsi_panel_reset(panel);
 		if (rc) {
 			pr_err("[%s] failed to reset panel, rc=%d\n", panel->name, rc);

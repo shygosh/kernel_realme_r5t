@@ -239,7 +239,7 @@ int dsi_display_set_backlight(struct drm_connector *connector,
 #ifdef CONFIG_VENDOR_EDIT
 	if ((bl_lvl == 0 && panel->bl_config.bl_level != 0) ||
 	    (bl_lvl != 0 && panel->bl_config.bl_level == 0))
-		pr_err("backlight level changed %d -> %d\n",
+		pr_debug("backlight level changed %d -> %d\n",
 		       panel->bl_config.bl_level, bl_lvl);
 
 #ifdef CONFIG_VENDOR_EDIT

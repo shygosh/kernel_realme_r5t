@@ -181,7 +181,7 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
 	//		display->panel->bl_config.brightness_max_level);
 //#else /* CONFIG_ODM_WT_EDIT */
 	bl_lvl=backlight_remapping_into_tddic_reg(brightness, display);
-	pr_info("LCD_LOG0 %s  level after %lld \n", __func__, bl_lvl);
+	pr_debug("LCD_LOG0 %s  level after %lld \n", __func__, bl_lvl);
 //#endif /* CONFIG_ODM_WT_EDIT */
 
 
