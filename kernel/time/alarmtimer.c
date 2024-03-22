@@ -261,7 +261,7 @@ static enum hrtimer_restart alarmtimer_fired(struct hrtimer *timer)
 				atomic_set(&alarm_sleep_busy_atomic, 0);
 			}
 			if (alarm->function) {
-				pr_info("%s.: type=%d, count=%lld, wakeup count=%lld, func=%pf\n", __func__, alarm->type, alarm_count, wakeup_source_count_rtc, alarm->function); //log diff, better for log filter
+				//pr_info("%s.: type=%d, count=%lld, wakeup count=%lld, func=%pf\n", __func__, alarm->type, alarm_count, wakeup_source_count_rtc, alarm->function); //log diff, better for log filter
 			}
 		} else {
 			if (alarm->function) {
