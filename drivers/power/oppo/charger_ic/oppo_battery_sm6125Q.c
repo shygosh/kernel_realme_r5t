@@ -72,7 +72,7 @@
 #define smblib_dbg(chg, reason, fmt, ...)			\
 	do {							\
 		if (*chg->debug_mask & (reason))		\
-			pr_info("%s: %s: " fmt, chg->name,	\
+			pr_debug("%s: %s: " fmt, chg->name,	\
 				__func__, ##__VA_ARGS__);	\
 		else						\
 			pr_debug("%s: %s: " fmt, chg->name,	\
@@ -1642,7 +1642,7 @@ void smblib_suspend_on_debug_battery(struct smb_charger *chg)
 		vote(chg->usb_icl_votable, DEBUG_BOARD_VOTER, val.intval, 0);
 		vote(chg->dc_suspend_votable, DEBUG_BOARD_VOTER, val.intval, 0);
 		if (val.intval)
-			pr_info("Input suspended: Fake battery\n");
+			pr_debug("Input suspended: Fake battery\n");
 	} else {
 		vote(chg->chg_disable_votable, DEBUG_BOARD_VOTER,
 					val.intval, 0);
@@ -12668,7 +12668,7 @@ static int smb5_show_charger_status(struct smb5 *chip)
 	}
 	batt_charge_type = val.intval;
 
-	pr_info("SMB5 status - usb:present=%d type=%d batt:present = %d health = %d charge = %d\n",
+	pr_debug("SMB5 status - usb:present=%d type=%d batt:present = %d health = %d charge = %d\n",
 		usb_present, chg->real_charger_type,
 		batt_present, batt_health, batt_charge_type);
 	return rc;
@@ -14625,7 +14625,7 @@ static int smb5_probe(struct platform_device *pdev)
 	struct smb5 *chip;
 	struct smb_charger *chg;
 	int rc = 0;
-	pr_info("smb5_probe start\n");
+	pr_debug("smb5_probe start\n");
 
 	chip = devm_kzalloc(&pdev->dev, sizeof(*chip), GFP_KERNEL);
 	if (!chip)
@@ -14965,9 +14965,9 @@ static int smb5_probe(struct platform_device *pdev)
         init_proc_show_voter_mask();
 #endif
 
-	pr_info("QPNP SMB5 probed successfully\n");
+	pr_debug("QPNP SMB5 probed successfully\n");
 
-    pr_info("smb5_probe end 1 \n");
+    pr_debug("smb5_probe end 1 \n");
 
 	return rc;
 
@@ -14976,7 +14976,7 @@ free_irq:
 cleanup:
 	smblib_deinit(chg);
 	platform_set_drvdata(pdev, NULL);
-    pr_info("smb5_probe end 2 \n");
+    pr_debug("smb5_probe end 2 \n");
 
 	return rc;
 }

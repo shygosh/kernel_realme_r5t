@@ -332,7 +332,7 @@ static int bq27541_soc_calibrate(int soc)
                 soc_calib = 0;
         }
         gauge_ic->soc_pre = soc_calib;
-        /*pr_info("soc:%d, soc_calib:%d\n", soc, soc_calib); */
+        /*pr_debug("soc:%d, soc_calib:%d\n", soc, soc_calib); */
         return soc_calib;
 }
 

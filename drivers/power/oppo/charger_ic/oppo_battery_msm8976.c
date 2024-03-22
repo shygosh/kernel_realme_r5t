@@ -138,7 +138,7 @@ module_param_named(
 #define pr_smb(reason, fmt, ...)				\
 	do {							\
 		if (smbchg_debug_mask & (reason))		\
-			pr_info(fmt, ##__VA_ARGS__);		\
+			pr_debug(fmt, ##__VA_ARGS__);		\
 		else						\
 			pr_debug(fmt, ##__VA_ARGS__);		\
 	} while (0)
@@ -146,7 +146,7 @@ module_param_named(
 #define pr_smb_rt(reason, fmt, ...)					\
 	do {								\
 		if (smbchg_debug_mask & (reason))			\
-			pr_info_ratelimited(fmt, ##__VA_ARGS__);	\
+			pr_debug_ratelimited(fmt, ##__VA_ARGS__);	\
 		else							\
 			pr_debug_ratelimited(fmt, ##__VA_ARGS__);	\
 	} while (0)
@@ -1583,7 +1583,7 @@ static int smbchg_set_usb_current_max(struct oppo_chg_chip *chip,
 	char *usb_type_name = "null";
 	pr_smb(PR_STATUS, "[set_usb_current_max--begin]USB current_ma = %d,usb_max_current=%d\n", current_ma,chip->pmic_spmi.usb_max_current_ma);
 	if (!chip->pmic_spmi.batt_present) {
-		pr_info_ratelimited("Ignoring usb current->%d, battery is absent\n",
+		pr_debug_ratelimited("Ignoring usb current->%d, battery is absent\n",
 				current_ma);
 		chg_err("[set_usb_current_max--middle]USB current_ma = %d,usb_max_current=%d\n", current_ma,chip->pmic_spmi.usb_max_current_ma);
 		return 0;
@@ -3363,7 +3363,7 @@ static int smbchg_config_chg_battery_type(struct oppo_chg_chip *chip)
 		ret = rc;
 	} else {
 		if (chip->pmic_spmi.vfloat_mv != (max_voltage_uv / 1000)) {
-			pr_info("Vfloat changed from %dmV to %dmV for battery-type %s\n",
+			pr_debug("Vfloat changed from %dmV to %dmV for battery-type %s\n",
 				chip->pmic_spmi.vfloat_mv, (max_voltage_uv / 1000),
 				chip->pmic_spmi.battery_type);
 			rc = smbchg_float_voltage_set(chip,

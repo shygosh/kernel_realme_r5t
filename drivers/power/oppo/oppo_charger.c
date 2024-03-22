@@ -84,12 +84,7 @@ int enable_charger_log = 2;
 int charger_abnormal_log = 0;
 int tbatt_pwroff_enable = 1;
 
-#define charger_xlog_printk(num, fmt, ...) \
-        do { \
-                if (enable_charger_log >= (int)num) { \
-                        printk(KERN_NOTICE pr_fmt("[OPPO_CHG][%s]"fmt), __func__, ##__VA_ARGS__); \
-                } \
-        } while (0)
+#define charger_xlog_printk(num, fmt, ...) do { } while (0)
 
 void oppo_chg_turn_off_charging(struct oppo_chg_chip *chip);
 void oppo_chg_turn_on_charging(struct oppo_chg_chip *chip);
@@ -4548,7 +4543,7 @@ void change_charge_current_according_battery_temp(struct oppo_chg_chip *chip)
     else if (g_batt_temp_status == 34)
         vote(chg->usb_icl_votable, FB_BLANK_VOTER, true, min(lcd_on_chg_curr_proc, TEMP_CURRENT_2000_MA));
     else
-        pr_info("WT-log error can not find g_batt_temp_status\n");
+        pr_debug("WT-log error can not find g_batt_temp_status\n");
 
     if (batt_temp_change_flag == 1) {
         batt_temp_36_flag = 0;
@@ -4646,7 +4641,7 @@ void change_charge_current_according_cpu_temp(struct oppo_chg_chip *chip)
     else if (g_cpu_temp_status_1 == 47)
         vote(chg->usb_icl_votable, CPU_TEMP_VOTER, true, TEMP_CURRENT_1200_MA);
     else
-        pr_info("WT_log error can not find g_cpu_temp_status_1\n");
+        pr_debug("WT_log error can not find g_cpu_temp_status_1\n");
 }
 
 static void oppo_chg_batt_skin_cpu_temp_set_current(struct oppo_chg_chip *chip)

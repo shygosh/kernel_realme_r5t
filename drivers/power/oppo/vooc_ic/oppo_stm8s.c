@@ -276,7 +276,7 @@ static bool stm8s_fw_check_frontline(struct oppo_vooc_chip *chip)
 /*#endif*/
         /*compare recv_buf with Stm8s_firmware_data[] end*/
         }
-        /*pr_info("  success\n"  );*/
+        /*pr_debug("  success\n"  );*/
         return FW_CHECK_SUCCESS;
 
 i2c_err:

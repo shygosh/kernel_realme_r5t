@@ -1964,7 +1964,7 @@ static int smbchg_set_usb_current_max(struct oppo_chg_chip *chip,
 	 * order to avoid browning out the device during a hotswap.
 	 */
 	if (!chip->pmic_spmi.batt_present && current_ma < chip->pmic_spmi.usb_max_current_ma) {
-		pr_info_ratelimited("Ignoring usb current->%d, battery is absent\n",
+		pr_debug_ratelimited("Ignoring usb current->%d, battery is absent\n",
 				current_ma);
 		return 0;
 	}
@@ -3929,7 +3929,7 @@ static int smbchg_config_chg_battery_type(struct oppo_chg_chip *chip)
 		ret = rc;
 	} else {
 		if (chip->pmic_spmi.vfloat_mv != (max_voltage_uv / 1000)) {
-			pr_info("Vfloat changed from %dmV to %dmV for battery-type %s\n",
+			pr_debug("Vfloat changed from %dmV to %dmV for battery-type %s\n",
 				chip->pmic_spmi.vfloat_mv, (max_voltage_uv / 1000),
 				chip->pmic_spmi.battery_type);
 			rc = smbchg_float_voltage_set(chip,
@@ -3951,7 +3951,7 @@ static int smbchg_config_chg_battery_type(struct oppo_chg_chip *chip)
 	} else if (!rc) {
 		if (chip->pmic_spmi.iterm_ma != (iterm_ua / 1000)
 				&& !chip->pmic_spmi.iterm_disabled) {
-			pr_info("Term current changed from %dmA to %dmA for battery-type %s\n",
+			pr_debug("Term current changed from %dmA to %dmA for battery-type %s\n",
 				chip->pmic_spmi.iterm_ma, (iterm_ua / 1000),
 				chip->pmic_spmi.battery_type);
 			rc = smbchg_iterm_set(chip,

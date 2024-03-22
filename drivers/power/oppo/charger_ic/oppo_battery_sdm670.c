@@ -301,7 +301,7 @@ module_param_named(
 #define smblib_dbg(chg, reason, fmt, ...)			\
 		do {							\
 			if (*chg->debug_mask & (reason))		\
-				pr_info("%s: %s: " fmt, chg->name,	\
+				pr_debug("%s: %s: " fmt, chg->name,	\
 					__func__, ##__VA_ARGS__);	\
 			else						\
 				pr_debug("%s: %s: " fmt, chg->name, \
@@ -1040,7 +1040,7 @@ void smblib_suspend_on_debug_battery(struct smb_charger *chg)
 	vote(chg->usb_icl_votable, DEBUG_BOARD_VOTER, val.intval, 0);
 	vote(chg->dc_suspend_votable, DEBUG_BOARD_VOTER, val.intval, 0);
 	if (val.intval)
-		pr_info("Input suspended: Fake battery\n");
+		pr_debug("Input suspended: Fake battery\n");
 }
 
 int smblib_rerun_apsd_if_required(struct smb_charger *chg)
@@ -4075,7 +4075,7 @@ irqreturn_t smblib_handle_usb_plugin(int irq, void *data)
 	struct oppo_chg_chip *chip = g_oppo_chip;
 	if ((chg->typec_mode == POWER_SUPPLY_TYPEC_SINK || chg->typec_mode == POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE)
 		&& chip->vbatt_num == 2 ) {
-		pr_info("%s:chg->typec_mode = sink return!\n", __func__);
+		pr_debug("%s:chg->typec_mode = sink return!\n", __func__);
 		return IRQ_HANDLED;
 	}
 #endif/*CONFIG_VENDOR_EDIT*/
@@ -4428,7 +4428,7 @@ irqreturn_t smblib_handle_usb_source_change(int irq, void *data)
 
 	if ((chg->typec_mode == POWER_SUPPLY_TYPEC_SINK || chg->typec_mode == POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE)
 		&& chip->vbatt_num == 2 ) {
-		pr_info("%s:chg->typec_mode = sink return!\n", __func__);
+		pr_debug("%s:chg->typec_mode = sink return!\n", __func__);
 		return IRQ_HANDLED;
 	}
 #endif/*CONFIG_VENDOR_EDIT*/
@@ -4951,7 +4951,7 @@ static void smblib_handle_typec_cc_state_change(struct smb_charger *chg)
 #ifdef CONFIG_VENDOR_EDIT//Fanhong.Kong@ProDrv.CHG,add 2018/06/02 for SVOOC OTG
 	//if ((chg->typec_mode == POWER_SUPPLY_TYPEC_SINK || chg->typec_mode == POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE)
 		//&& chip->vbatt_num == 2 ) {
-		//pr_info("%s: chg->typec_mode = SINK,Disable APSD!\n", __func__);
+		//pr_debug("%s: chg->typec_mode = SINK,Disable APSD!\n", __func__);
 		///vote(chg->apsd_disable_votable, SVOOC_OTG_VOTER, true, 0);
 	//}
 #endif/*CONFIG_VENDOR_EDIT*/
@@ -11183,7 +11183,7 @@ static int smb2_probe(struct platform_device *pdev)
 		schedule_delayed_work(&chg->typec_disable_cmd_work, msecs_to_jiffies(1000));
 #endif
 
-	pr_info("QPNP SMB2 probed successfully usb:present=%d type=%d batt:present = %d health = %d charge = %d\n",
+	pr_debug("QPNP SMB2 probed successfully usb:present=%d type=%d batt:present = %d health = %d charge = %d\n",
 		usb_present, chg->real_charger_type,
 		batt_present, batt_health, batt_charge_type);
 	return rc;
