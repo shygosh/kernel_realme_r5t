@@ -105,7 +105,7 @@
 #define DUMP(level, fmt, arg...)		\
 	do {					\
 		if (level & ipio_debug_level)	\
-		pr_cont(fmt, ##arg);		\
+		pr_debug(fmt, ##arg);		\
 	} while (0)
 
 struct ini_file_data {
@@ -327,17 +327,17 @@ static void dump_benchmark_data(s32 *max_ptr, s32 *min_ptr)
 		ipio_info("Dump Benchmark Max\n");
 
 		for (i = 0; i < core_mp.frame_len; i++) {
-			pr_cont("%d, ", max_ptr[i]);
+			pr_debug("%d, ", max_ptr[i]);
 			if (i % core_mp.xch_len == core_mp.xch_len - 1)
-				pr_cont("\n");
+				pr_debug("\n");
 		}
 
-		pr_cont("Dump Denchmark Min\n");
+		pr_debug("Dump Denchmark Min\n");
 
 		for (i = 0; i < core_mp.frame_len; i++) {
-			pr_cont("%d, ", min_ptr[i]);
+			pr_debug("%d, ", min_ptr[i]);
 			if (i % core_mp.xch_len == core_mp.xch_len - 1)
-				pr_cont("\n");
+				pr_debug("\n");
 		}
 	}
 }
@@ -349,9 +349,9 @@ void dump_node_type_buffer(s32 *node_ptr, u8 *name)
 	if (ipio_debug_level & DEBUG_MP) {
 		ipio_info("Dump NodeType\n");
 		for (i = 0; i < core_mp.frame_len; i++) {
-			pr_cont("%d, ", node_ptr[i]);
+			pr_debug("%d, ", node_ptr[i]);
 			if (i % core_mp.xch_len == core_mp.xch_len-1)
-				pr_cont("\n");
+				pr_debug("\n");
 		}
 	}
 }
@@ -1180,10 +1180,10 @@ static void mp_compare_cdc_show_result(int index, s32 *tmp, char *csv,
 out:
 	if (type == TYPE_JUGE) {
 		if (mp_result == MP_PASS) {
-			pr_info("\n Result : PASS\n");
+			pr_debug("\n Result : PASS\n");
 			tmp_len += sprintf(csv + tmp_len, "Result : PASS\n");
 		} else {
-			pr_info("\n Result : FAIL\n");
+			pr_debug("\n Result : FAIL\n");
 			tmp_len += sprintf(csv + tmp_len, "Result : FAIL\n");
 		}
 	}
@@ -2407,14 +2407,14 @@ static int mp_test_data_sort_average(s32 *oringin_data, int index, s32 *avg_resu
 	ipio_debug(DEBUG_MP, "Up=%d, Down=%d -%s\n", u32up_frame, u32down_frame, tItems[index].desp);
 
 	if (ipio_debug_level & DEBUG_MP) {
-		pr_cont("\n[Show Original frist%d and last%d node data]\n", len, len);
+		pr_debug("\n[Show Original frist%d and last%d node data]\n", len, len);
 		for (i = 0; i < core_mp.frame_len; i++) {
 			for (j = 0 ; j < tItems[index].frame_count ; j++) {
 				if ((i < len) || (i >= (core_mp.frame_len-len)))
-					pr_cont("%d,", u32data_buff[j * core_mp.frame_len + i]);
+					pr_debug("%d,", u32data_buff[j * core_mp.frame_len + i]);
 			}
 			if ((i < len) || (i >= (core_mp.frame_len-len)))
-				pr_cont("\n");
+				pr_debug("\n");
 		}
 	}
 
@@ -2433,14 +2433,14 @@ static int mp_test_data_sort_average(s32 *oringin_data, int index, s32 *avg_resu
 	}
 
 	if (ipio_debug_level & DEBUG_MP) {
-		pr_cont("\n[After sorting frist%d and last%d node data]\n", len, len);
+		pr_debug("\n[After sorting frist%d and last%d node data]\n", len, len);
 		for (i = 0; i < core_mp.frame_len; i++) {
 			for (j = u32down_frame; j < tItems[index].frame_count - u32up_frame; j++) {
 				if ((i < len) || (i >= (core_mp.frame_len - len)))
-					pr_cont("%d,", u32data_buff[i + j * core_mp.frame_len]);
+					pr_debug("%d,", u32data_buff[i + j * core_mp.frame_len]);
 			}
 			if ((i < len) || (i >= (core_mp.frame_len-len)))
-				pr_cont("\n");
+				pr_debug("\n");
 		}
 	}
 
@@ -2453,13 +2453,13 @@ static int mp_test_data_sort_average(s32 *oringin_data, int index, s32 *avg_resu
 	}
 
 	if (ipio_debug_level & DEBUG_MP) {
-		pr_cont("\n[Average result frist%d and last%d node data]\n", len, len);
+		pr_debug("\n[Average result frist%d and last%d node data]\n", len, len);
 		for (i = 0; i < core_mp.frame_len; i++) {
 			if ((i < len) || (i >= (core_mp.frame_len-len)))
-				pr_cont("%d,", avg_result[i]);
+				pr_debug("%d,", avg_result[i]);
 		}
 		if ((i < len) || (i >= (core_mp.frame_len-len)))
-			pr_cont("\n");
+			pr_debug("\n");
 	}
 
 	ipio_kfree((void **)&u32data_buff);
@@ -2624,23 +2624,23 @@ static void mp_show_result(const char *csv_path)
 			continue;
 
 		if (tItems[i].item_result == MP_PASS) {
-			pr_info("\n\n[%s],OK \n", tItems[i].desp);
+			pr_debug("\n\n[%s],OK \n", tItems[i].desp);
 			csv_len += sprintf(csv + csv_len, "\n\n[%s],OK\n", tItems[i].desp);
 		} else {
-			pr_info("\n\n[%s],NG \n", tItems[i].desp);
+			pr_debug("\n\n[%s],NG \n", tItems[i].desp);
 			csv_len += sprintf(csv + csv_len, "\n\n[%s],NG\n", tItems[i].desp);
 		}
 
 		mp_print_csv_cdc_cmd(csv, &csv_len, i);
 
-		pr_info("Frame count = %d\n", tItems[i].frame_count);
+		pr_debug("Frame count = %d\n", tItems[i].frame_count);
 		csv_len += sprintf(csv + csv_len, "Frame count = %d\n", tItems[i].frame_count);
 
 		if (tItems[i].trimmed_mean && tItems[i].catalog != PEAK_TO_PEAK_TEST) {
-			pr_info("lowest percentage = %d\n", tItems[i].lowest_percentage);
+			pr_debug("lowest percentage = %d\n", tItems[i].lowest_percentage);
 			csv_len += sprintf(csv + csv_len, "lowest percentage = %d\n", tItems[i].lowest_percentage);
 
-			pr_info("highest percentage = %d\n", tItems[i].highest_percentage);
+			pr_debug("highest percentage = %d\n", tItems[i].highest_percentage);
 			csv_len += sprintf(csv + csv_len, "highest percentage = %d\n", tItems[i].highest_percentage);
 		}
 
@@ -2658,10 +2658,10 @@ static void mp_show_result(const char *csv_path)
 				min_threshold[j] = tItems[i].min;
 			}
 
-			pr_info("Max = %d\n", tItems[i].max);
+			pr_debug("Max = %d\n", tItems[i].max);
 			csv_len += sprintf(csv + csv_len, "Max = %d\n", tItems[i].max);
 
-			pr_info("Min = %d\n", tItems[i].min);
+			pr_debug("Min = %d\n", tItems[i].min);
 			csv_len += sprintf(csv + csv_len, "Min = %d\n", tItems[i].min);
 		}
 
