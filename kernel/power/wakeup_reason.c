@@ -229,7 +229,7 @@ static int wakeup_src_fb_notifier_callback(struct notifier_block *self,
 		if (*blank == MSM_DRM_BLANK_POWERDOWN)
 		{
 			wakeup_src_clean();
-			pr_info("[wakeup_src_fb_notifier_callback] wakeup_src_clean all wakeup\n");
+			pr_debug("[wakeup_src_fb_notifier_callback] wakeup_src_clean all wakeup\n");
 		}
 	}
 	return 0;
@@ -261,7 +261,7 @@ static int wakeup_src_fb_notifier_callback(struct notifier_block *self,
 			if (*blank == FB_BLANK_POWERDOWN)
 			{
 				wakeup_src_clean();
-				pr_err("[wakeup_src_fb_notifier_callback] wakeup_src_clean all wakeup\n");
+				pr_debug("[wakeup_src_fb_notifier_callback] wakeup_src_clean all wakeup\n");
 			}
     }
 	return 0;

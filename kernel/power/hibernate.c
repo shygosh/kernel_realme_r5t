@@ -108,7 +108,7 @@ EXPORT_SYMBOL(system_entering_hibernation);
 #ifdef CONFIG_PM_DEBUG
 static void hibernation_debug_sleep(void)
 {
-	pr_info("hibernation debug: Waiting for 5 seconds.\n");
+	pr_debug("hibernation debug: Waiting for 5 seconds.\n");
 	mdelay(5000);
 }
 
@@ -254,7 +254,7 @@ void swsusp_show_speed(ktime_t start, ktime_t stop,
 		centisecs = 1;	/* avoid div-by-zero */
 	k = nr_pages * (PAGE_SIZE / 1024);
 	kps = (k * 100) / centisecs;
-	pr_info("%s %u kbytes in %u.%02u seconds (%u.%02u MB/s)\n",
+	pr_debug("%s %u kbytes in %u.%02u seconds (%u.%02u MB/s)\n",
 		msg, k, centisecs / 100, centisecs % 100, kps / 1000,
 		(kps % 1000) / 10);
 }
@@ -274,7 +274,7 @@ static int create_image(int platform_mode)
 
 	error = dpm_suspend_end(PMSG_FREEZE);
 	if (error) {
-		pr_err("Some devices failed to power down, aborting hibernation\n");
+		pr_debug("Some devices failed to power down, aborting hibernation\n");
 		return error;
 	}
 
@@ -290,7 +290,7 @@ static int create_image(int platform_mode)
 
 	error = syscore_suspend();
 	if (error) {
-		pr_err("Some system devices failed to power down, aborting hibernation\n");
+		pr_debug("Some system devices failed to power down, aborting hibernation\n");
 		goto Enable_irqs;
 	}
 
@@ -305,7 +305,7 @@ static int create_image(int platform_mode)
 	restore_processor_state();
 	trace_suspend_resume(TPS("machine_suspend"), PM_EVENT_HIBERNATE, false);
 	if (error)
-		pr_err("Error %d creating hibernation image\n", error);
+		pr_debug("Error %d creating hibernation image\n", error);
 
 	if (!in_suspend) {
 		events_check_enabled = false;
@@ -433,7 +433,7 @@ static int resume_target_kernel(bool platform_mode)
 
 	error = dpm_suspend_end(PMSG_QUIESCE);
 	if (error) {
-		pr_err("Some devices failed to power down, aborting resume\n");
+		pr_debug("Some devices failed to power down, aborting resume\n");
 		return error;
 	}
 
@@ -619,7 +619,7 @@ static void power_down(void)
 			/* Restore swap signature. */
 			error = swsusp_unmark();
 			if (error)
-				pr_err("Swap will be unusable! Try swapon -a.\n");
+				pr_debug("Swap will be unusable! Try swapon -a.\n");
 
 			return;
 		}
@@ -664,7 +664,7 @@ static int load_image_and_restore(void)
 	if (!error)
 		hibernation_restore(flags & SF_PLATFORM_MODE);
 
-	pr_err("Failed to load hibernation image, recovering.\n");
+	pr_debug("Failed to load hibernation image, recovering.\n");
 	swsusp_free();
 	free_basic_memory_bitmaps();
  Unlock:
@@ -693,7 +693,7 @@ int hibernate(void)
 		goto Unlock;
 	}
 
-	pr_info("hibernation entry\n");
+	pr_debug("hibernation entry\n");
 	pm_prepare_console();
 	error = __pm_notifier_call_chain(PM_HIBERNATION_PREPARE, -1, &nr_calls);
 	if (error) {
@@ -701,9 +701,9 @@ int hibernate(void)
 		goto Exit;
 	}
 
-	pr_info("Syncing filesystems ... \n");
+	pr_debug("Syncing filesystems ... \n");
 	sys_sync();
-	pr_info("done.\n");
+	pr_debug("done.\n");
 
 	error = freeze_processes();
 	if (error)
@@ -766,7 +766,7 @@ int hibernate(void)
  Unlock:
 	unlock_system_sleep();
 	place_marker("PM: Hibernation Exit!");
-	pr_info("hibernation exit\n");
+	pr_debug("hibernation exit\n");
 
 	return error;
 }
@@ -820,7 +820,7 @@ static int software_resume(void)
 	pm_pr_dbg("Checking hibernation image partition %s\n", resume_file);
 
 	if (resume_delay) {
-		pr_info("Waiting %dsec before reading resume device ...\n",
+		pr_debug("Waiting %dsec before reading resume device ...\n",
 			resume_delay);
 		ssleep(resume_delay);
 	}
@@ -874,7 +874,7 @@ static int software_resume(void)
 		goto Unlock;
 	}
 
-	pr_info("resume from hibernation\n");
+	pr_debug("resume from hibernation\n");
 	pm_prepare_console();
 	error = __pm_notifier_call_chain(PM_RESTORE_PREPARE, -1, &nr_calls);
 	if (error) {
@@ -892,7 +892,7 @@ static int software_resume(void)
  Finish:
 	__pm_notifier_call_chain(PM_POST_RESTORE, nr_calls, NULL);
 	pm_restore_console();
-	pr_info("resume from hibernation failed (%d)\n", error);
+	pr_debug("resume from hibernation failed (%d)\n", error);
 	atomic_inc(&snapshot_device_available);
 	/* For success case, the suspend path will release the lock */
  Unlock:
@@ -1057,7 +1057,7 @@ static ssize_t resume_store(struct kobject *kobj, struct kobj_attribute *attr,
 	lock_system_sleep();
 	swsusp_resume_device = res;
 	unlock_system_sleep();
-	pr_info("Starting manual resume from disk\n");
+	pr_debug("Starting manual resume from disk\n");
 	noresume = 0;
 	software_resume();
 	return n;
