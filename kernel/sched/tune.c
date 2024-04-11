@@ -632,28 +632,56 @@ boost_write(struct cgroup_subsys_state *css, struct cftype *cft,
 	return 0;
 }
 
+#ifdef CONFIG_STUNE_ASSIST
+#ifdef CONFIG_SCHED_WALT
+static int sched_boost_override_write_wrapper(struct cgroup_subsys_state *css,
+					      struct cftype *cft, u64 override)
+{
+	return sched_boost_override_write(css, cft, override);
+}
+
+static int sched_colocate_write_wrapper(struct cgroup_subsys_state *css,
+					struct cftype *cft, u64 colocate)
+{
+	return sched_colocate_write(css, cft, colocate);
+}
+#endif
+
+static int boost_write_wrapper(struct cgroup_subsys_state *css,
+			       struct cftype *cft, s64 boost)
+{
+	return boost_write(css, cft, boost);
+}
+
+static int prefer_idle_write_wrapper(struct cgroup_subsys_state *css,
+				     struct cftype *cft, u64 prefer_idle)
+{
+	return prefer_idle_write(css, cft, prefer_idle);
+}
+#endif
+
 static struct cftype files[] = {
 #ifdef CONFIG_SCHED_WALT
 	{
-		.name = "sched_boost_no_override_alt",
+		.name = "sched_boost_no_override",
 		.read_u64 = sched_boost_override_read,
-		.write_u64 = sched_boost_override_write,
+		.write_u64 = sched_boost_override_write_wrapper,
 	},
 	{
-		.name = "colocate_alt",
+		.name = "colocate",
 		.read_u64 = sched_colocate_read,
-		.write_u64 = sched_colocate_write,
+		.write_u64 = sched_colocate_write_wrapper,
 	},
 #endif
 	{
-		.name = "boost_alt",
+		.name = "boost",
 		.read_s64 = boost_read,
-		.write_s64 = boost_write,
+		.write_s64 = boost_write_wrapper,
 	},
 	{
-		.name = "prefer_idle_alt",
+		.name = "prefer_idle",
 		.read_u64 = prefer_idle_read,
-		.write_u64 = prefer_idle_write,
+		.write_u64 = prefer_idle_write_wrapper,
 	},
 	{ }	/* terminate */
 };
