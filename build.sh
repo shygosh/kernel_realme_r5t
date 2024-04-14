@@ -1,6 +1,6 @@
 #!/bin/bash
 DATE=$(date '+%m%d%H%M')
-VERSION=GHOST-R5T-$DATE
+VERSION=GHOST-SE-R5T-$DATE
 AK3=$(realpath ../AnyKernel3)
 O=$(realpath ../out)
 DEFCONFIG=vendor/r5t_defconfig
