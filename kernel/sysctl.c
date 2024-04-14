@@ -1447,7 +1447,7 @@ static struct ctl_table kern_table[] = {
 
 static struct ctl_table vm_table[] = {
 	{
-		.procname	= "overcommit_memory",
+		.procname	= "overcommit_memory_alt",
 		.data		= &sysctl_overcommit_memory,
 		.maxlen		= sizeof(sysctl_overcommit_memory),
 		.mode		= 0644,
