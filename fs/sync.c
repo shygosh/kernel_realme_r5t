@@ -8,7 +8,6 @@
 #include <linux/fs.h>
 #include <linux/slab.h>
 #include <linux/export.h>
-#include <linux/module.h>
 #include <linux/namei.h>
 #include <linux/sched/xacct.h>
 #include <linux/writeback.h>
@@ -22,9 +21,6 @@
 // Add for get cpu load
 #include <soc/oppo/oppo_healthinfo.h>
 #endif /*CONFIG_VENDOR_EDIT*/
-
-bool fsync_enabled = false;
-module_param(fsync_enabled, bool, 0644);
 
 #define VALID_FLAGS (SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE| \
 			SYNC_FILE_RANGE_WAIT_AFTER)
@@ -162,14 +158,10 @@ void emergency_sync(void)
  */
 SYSCALL_DEFINE1(syncfs, int, fd)
 {
-	struct fd f;
+	struct fd f = fdget(fd);
 	struct super_block *sb;
 	int ret;
 
-	if (!fsync_enabled)
-		return 0;
-
-	f = fdget(fd);
 	if (!f.file)
 		return -EBADF;
 	sb = f.file->f_path.dentry->d_sb;
@@ -196,9 +188,6 @@ SYSCALL_DEFINE1(syncfs, int, fd)
 int vfs_fsync_range(struct file *file, loff_t start, loff_t end, int datasync)
 {
 	struct inode *inode = file->f_mapping->host;
-
-	if (!fsync_enabled)
-		return 0;
 
 	if (!file->f_op->fsync)
 		return -EINVAL;
@@ -233,21 +222,13 @@ extern void ohm_schedstats_record(int sched_type, int fg, u64 delta_ms);
 
 static int do_fsync(unsigned int fd, int datasync)
 {
-	struct fd f;
+	struct fd f = fdget(fd);
 	int ret = -EBADF;
 #if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
 // Add for record  fsync  time
-    unsigned long oppo_fsync_time;
+    unsigned long oppo_fsync_time = jiffies;
 #endif /*CONFIG_VENDOR_EDIT*/
 
-	if (!fsync_enabled)
-		return 0;
-
-#if defined(CONFIG_VENDOR_EDIT) && defined(CONFIG_OPPO_HEALTHINFO)
-	oppo_fsync_time = jiffies;
-#endif /*CONFIG_VENDOR_EDIT*/
- 
-	f = fdget(fd);
 	if (f.file) {
 		ret = vfs_fsync(f.file, datasync);
 		fdput(f);
@@ -325,9 +306,6 @@ SYSCALL_DEFINE4(sync_file_range, int, fd, loff_t, offset, loff_t, nbytes,
 	struct address_space *mapping;
 	loff_t endbyte;			/* inclusive */
 	umode_t i_mode;
-
-	if (!fsync_enabled)
-		return 0;
 
 	ret = -EINVAL;
 	if (flags & ~VALID_FLAGS)
